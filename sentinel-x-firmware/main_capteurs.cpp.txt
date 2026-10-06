@@ -1,0 +1,204 @@
+#include <Arduino.h>
+#include <DHT.h>
+#include <U8g2lib.h>
+
+// --- Broches ---
+const int BUZZER_PIN = D0;
+const int LED_PIN    = D1;
+const int DHT_PIN    = D2;
+const int OLED_SCL   = D3;
+const int OLED_SDA   = D4;
+const int PIR_PIN    = D5;
+const int GAS_PIN    = A0;
+
+#define DHTTYPE DHT22
+DHT dht(DHT_PIN, DHTTYPE);
+
+// Si ton écran est un SH1106, remplace SSD1306 par SH1106 sur la ligne suivante
+U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, OLED_SCL, OLED_SDA, U8X8_PIN_NONE);
+
+// --- Durées (ms) ---
+const unsigned long DHT_INTERVAL  = 2000;
+const unsigned long LED_INTERVAL  = 500;
+const unsigned long OLED_INTERVAL = 500;
+const unsigned long GAS_INTERVAL  = 1000;
+const unsigned long BEEP_INTERVAL = 10000;
+const unsigned long BEEP_DURATION = 200;
+const unsigned long PIR_WARMUP    = 30000;
+const unsigned long GAS_WARMUP    = 60000;  // le MQ-135 doit chauffer, plus c'est long, plus c'est stable
+
+// --- Seuils gaz (écart par rapport à l'air calme mesuré après le chauffage) ---
+const int GAS_THRESHOLD_HIGH  = 100;
+const int GAS_THRESHOLD_ALERT = 250;
+
+unsigned long lastDht = 0, lastLed = 0, lastOled = 0, lastGas = 0, lastBeep = 0, beepStart = 0;
+bool ledState = false;
+bool beeping = false;
+bool dhtOk = false;
+bool presence = false;
+bool lastPresence = false;
+float temperature = 0;
+float humidity = 0;
+int gasValue = 0;
+float gasBaseline = -1;
+
+int readGasAverage(int samples) {
+  long sum = 0;
+  for (int i = 0; i < samples; i++) {
+    sum += analogRead(GAS_PIN);
+    delay(5);
+  }
+  return sum / samples;
+}
+
+void readGas(unsigned long now) {
+  gasValue = readGasAverage(10);
+
+  if (now >= GAS_WARMUP && gasBaseline < 0) {
+    gasBaseline = readGasAverage(20);
+    Serial.printf("Gaz : valeur de reference = %.0f\n", gasBaseline);
+  } else if (gasBaseline >= 0) {
+    if (gasValue < gasBaseline) {
+      gasBaseline = gasValue;
+    } else if (gasValue - gasBaseline < GAS_THRESHOLD_HIGH / 2) {
+      gasBaseline += (gasValue - gasBaseline) * 0.02;
+    }
+  }
+
+  Serial.printf("Gaz : %d (reference %.0f)\n", gasValue, gasBaseline);
+}
+
+const char* gasLevel(unsigned long now) {
+  if (now < GAS_WARMUP || gasBaseline < 0) return "chauffe";
+  int delta = gasValue - gasBaseline;
+  if (delta > GAS_THRESHOLD_ALERT) return "ALERTE";
+  if (delta > GAS_THRESHOLD_HIGH) return "eleve";
+  return "normal";
+}
+
+void readDht() {
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+
+  if (isnan(h) || isnan(t) || t < -40 || t > 80 || h < 0 || h > 100) {
+    dhtOk = false;
+    Serial.println("DHT22 : lecture invalide");
+    return;
+  }
+
+  temperature = t;
+  humidity = h;
+  dhtOk = true;
+  Serial.printf("Temperature : %.1f C | Humidite : %.1f %%\n", t, h);
+}
+
+void readPir(unsigned long now) {
+  if (now < PIR_WARMUP) {
+    presence = false;
+    return;
+  }
+
+  presence = digitalRead(PIR_PIN) == HIGH;
+
+  if (presence != lastPresence) {
+    lastPresence = presence;
+    Serial.println(presence ? "PRESENCE detectee" : "Plus de presence");
+  }
+}
+
+void drawOled(unsigned long now) {
+  char line[28];
+
+  u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_6x10_tf);
+
+  u8g2.drawStr(0, 10, "Sentinel-X");
+
+  if (dhtOk) {
+    snprintf(line, sizeof(line), "T:%.1fC  H:%.1f%%", temperature, humidity);
+  } else {
+    snprintf(line, sizeof(line), "DHT22 : erreur");
+  }
+  u8g2.drawStr(0, 22, line);
+
+  if (now < GAS_WARMUP) {
+    snprintf(line, sizeof(line), "Gaz: chauffe %lus", (GAS_WARMUP - now) / 1000);
+  } else {
+    snprintf(line, sizeof(line), "Gaz:%d %s", gasValue, gasLevel(now));
+  }
+  u8g2.drawStr(0, 34, line);
+
+  if (now < PIR_WARMUP) {
+    snprintf(line, sizeof(line), "PIR: calib. %lus", (PIR_WARMUP - now) / 1000);
+  } else {
+    snprintf(line, sizeof(line), "Presence: %s", presence ? "OUI" : "non");
+  }
+  u8g2.drawStr(0, 46, line);
+
+  unsigned long elapsed = now - lastBeep;
+  unsigned long remaining = elapsed >= BEEP_INTERVAL ? 0 : (BEEP_INTERVAL - elapsed + 999) / 1000;
+  snprintf(line, sizeof(line), "Prochain bip: %lus", remaining);
+  u8g2.drawStr(0, 58, line);
+
+  u8g2.sendBuffer();
+}
+
+void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(LED_PIN, LOW);
+
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Test global Sentinel-X");
+
+  dht.begin();
+  u8g2.begin();
+
+  unsigned long now = millis();
+  lastBeep = now;
+  readDht();
+  gasValue = readGasAverage(10);
+  drawOled(now);
+}
+
+void loop() {
+  unsigned long now = millis();
+
+  readPir(now);
+
+  if (now - lastDht >= DHT_INTERVAL) {
+    lastDht = now;
+    readDht();
+  }
+
+  if (now - lastGas >= GAS_INTERVAL) {
+    lastGas = now;
+    readGas(now);
+  }
+
+  if (now - lastLed >= LED_INTERVAL) {
+    lastLed = now;
+    ledState = !ledState;
+    digitalWrite(LED_PIN, ledState);
+  }
+
+  if (!beeping && now - lastBeep >= BEEP_INTERVAL) {
+    lastBeep = now;
+    beepStart = now;
+    beeping = true;
+    digitalWrite(BUZZER_PIN, HIGH);
+    Serial.println("BIP");
+  }
+  if (beeping && now - beepStart >= BEEP_DURATION) {
+    beeping = false;
+    digitalWrite(BUZZER_PIN, LOW);
+  }
+
+  if (now - lastOled >= OLED_INTERVAL) {
+    lastOled = now;
+    drawOled(now);
+  }
+}
