@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  sentinel-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sentinel-x-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      - API_ENV=production
+      - API_HOST=0.0.0.0
+      - API_PORT=8080
+      - API_SECRET_KEY=${API_SECRET_KEY:-sentinel-x-secret-key-2026}
+      # Connexion MariaDB Galera (VM Infra)
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./sentinel.db}
+      # Connexion Mosquitto (VM Broker Infra)
+      - MQTT_BROKER_HOST=${MQTT_BROKER_HOST:-172.16.137.4}
+      - MQTT_BROKER_PORT=${MQTT_BROKER_PORT:-8883}
+      - MQTT_USERNAME=${MQTT_USERNAME:-admin}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-Epsi1234.!}
+      - MQTT_USE_TLS=${MQTT_USE_TLS:-true}
+      - MQTT_CLIENT_ID=${MQTT_CLIENT_ID:-sentinel-api-prod}
+      # Robot Yanshee
+      - MQTT_ROBOT_CMD_TOPIC=detection_robot/command
+      - MQTT_ROBOT_STATUS_TOPIC=detection_robot/action_status
+    volumes:
+      # Persistance de la base locale si SQLite est utilisé en secours
+      - api-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  api-data:
