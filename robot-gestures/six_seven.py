@@ -42,12 +42,12 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
     global running
     print("[6-7] Démarrage du geste '6 - 7' (%d cycles)..." % cycles)
 
-    # 1. Pose de départ : bras parfaitement droits et verrouillés devant (manchette)
+    # 1. Pose de départ : bras 100% droits et tendus devant lui (coudes calibrés à 90)
     ready_pose = {
         "LeftShoulderFlex": 10,
         "RightShoulderFlex": 170,
-        "LeftElbowFlex": 10,
-        "RightElbowFlex": 170,
+        "LeftElbowFlex": 90,
+        "RightElbowFlex": 90,
         "LeftShoulderRoll": 165,
         "RightShoulderRoll": 15,
         "NeckLR": 90
@@ -59,15 +59,15 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
         if not running:
             break
 
-        # --- Phase "6" : Rotation épaule Gauche monte un peu, Droite descend un peu ---
-        print("[6-7] [%d/%d] ---> SIX  (Épaule gauche HAUT / Épaule droite BAS)" % (i, cycles))
+        # --- Phase "6" : Épaule Gauche HAUT, Épaule Droite BAS (bras tendus) ---
+        print("[6-7] [%d/%d] ---> SIX  (Bras gauche HAUT / Bras droit BAS)" % (i, cycles))
         six_pose = {
             "LeftShoulderRoll": 145,   # monte un peu
             "RightShoulderRoll": 35,   # descend un peu
-            "LeftShoulderFlex": 10,    # bras droit devant
-            "RightShoulderFlex": 170,  # bras droit devant
-            "LeftElbowFlex": 10,       # bras droit
-            "RightElbowFlex": 170,     # bras droit
+            "LeftShoulderFlex": 10,    # bras tendu devant
+            "RightShoulderFlex": 170,  # bras tendu devant
+            "LeftElbowFlex": 90,       # coude 100% droit
+            "RightElbowFlex": 90,      # coude 100% droit
             "NeckLR": 80
         }
         YanAPI.set_servos_angles(six_pose, runtime=speed_ms)
@@ -76,15 +76,15 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
         if not running:
             break
 
-        # --- Phase "7" : Rotation épaule Droite monte un peu, Gauche descend un peu ---
-        print("[6-7] [%d/%d] ---> SEVEN (Épaule droite HAUT / Épaule gauche BAS)" % (i, cycles))
+        # --- Phase "7" : Épaule Droite HAUT, Épaule Gauche BAS (bras tendus) ---
+        print("[6-7] [%d/%d] ---> SEVEN (Bras droit HAUT / Bras gauche BAS)" % (i, cycles))
         seven_pose = {
             "LeftShoulderRoll": 180,   # descend un peu
             "RightShoulderRoll": 0,    # monte un peu
-            "LeftShoulderFlex": 10,    # bras droit devant
-            "RightShoulderFlex": 170,  # bras droit devant
-            "LeftElbowFlex": 10,       # bras droit
-            "RightElbowFlex": 170,     # bras droit
+            "LeftShoulderFlex": 10,    # bras tendu devant
+            "RightShoulderFlex": 170,  # bras tendu devant
+            "LeftElbowFlex": 90,       # coude 100% droit
+            "RightElbowFlex": 90,      # coude 100% droit
             "NeckLR": 100
         }
         YanAPI.set_servos_angles(seven_pose, runtime=speed_ms)
