@@ -13,8 +13,8 @@ import signal
 import YanAPI
 
 # Paramètres configurables via l'environnement
-REPETITIONS = int(os.environ.get("GESTURE_REPEAT", "4"))    # Nombre de cycles (6-7)
-STEP_TIME = int(os.environ.get("GESTURE_SPEED_MS", "450"))  # Durée d'un mouvement en ms
+REPETITIONS = int(os.environ.get("GESTURE_REPEAT", "6"))    # Nombre de cycles (6-7)
+STEP_TIME = int(os.environ.get("GESTURE_SPEED_MS", "240"))  # Durée d'un mouvement en ms (vitesse rapide et incisive)
 REST_ON_EXIT = True
 
 running = True
@@ -71,7 +71,7 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
             "NeckLR": 80
         }
         YanAPI.set_servos_angles(six_pose, runtime=speed_ms)
-        time.sleep(speed_ms / 1000.0 + 0.05)
+        time.sleep(speed_ms / 1000.0 + 0.02)
 
         if not running:
             break
@@ -88,7 +88,7 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
             "NeckLR": 100
         }
         YanAPI.set_servos_angles(seven_pose, runtime=speed_ms)
-        time.sleep(speed_ms / 1000.0 + 0.05)
+        time.sleep(speed_ms / 1000.0 + 0.02)
 
     print("[6-7] Geste terminé ! Retour en position neutre.")
     if REST_ON_EXIT:
