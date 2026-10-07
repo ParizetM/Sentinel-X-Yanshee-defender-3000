@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+# coding=utf-8
+"""
+SENTINEL-X — Geste Mème Viral "6 - 7" (Six-Seven / La Balance)
+Anime les bras et la tête du robot Yanshee pour reproduire
+la balance "6 7" (mains qui pèsent alternativement de gauche à droite).
+"""
+
+import os
+import sys
+import time
+import signal
+import YanAPI
+
+# Paramètres configurables via l'environnement
+REPETITIONS = int(os.environ.get("GESTURE_REPEAT", "4"))    # Nombre de cycles (6-7)
+STEP_TIME = int(os.environ.get("GESTURE_SPEED_MS", "450"))  # Durée d'un mouvement en ms
+REST_ON_EXIT = True
+
+running = True
+
+def signal_handler(sig, frame):
+    global running
+    print("\n[6-7] Arrêt demandé, remise en position neutre...")
+    running = False
+    try:
+        YanAPI.sync_play_motion(name="reset", speed="normal")
+    except Exception:
+        pass
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
+def init_robot():
+    YanAPI.yan_api_init("127.0.0.1")
+    print("[6-7] Initialisation : position stable debout...")
+    YanAPI.sync_play_motion(name="reset", speed="normal")
+    time.sleep(0.5)
+
+def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
+    global running
+    print("[6-7] Démarrage du geste '6 - 7' (%d cycles)..." % cycles)
+
+    # 1. Pose de départ : bras tendus devant lui à l'horizontale (manchette parfaite)
+    ready_pose = {
+        "LeftShoulderRoll": 170,
+        "LeftShoulderFlex": 25,
+        "LeftElbowFlex": 20,
+        "RightShoulderRoll": 10,
+        "RightShoulderFlex": 155,
+        "RightElbowFlex": 160,
+        "NeckLR": 90
+    }
+    YanAPI.set_servos_angles(ready_pose, runtime=700)
+    time.sleep(0.8)
+
+    for i in range(1, cycles + 1):
+        if not running:
+            break
+
+        # --- Phase "6" : Bras Gauche HAUT, Bras Droit BAS (bras tendus) ---
+        print("[6-7] [%d/%d] ---> SIX  (Bras gauche HAUT / Bras droit BAS)" % (i, cycles))
+        six_pose = {
+            "LeftShoulderRoll": 170,
+            "LeftShoulderFlex": 48,
+            "LeftElbowFlex": 20,
+            "RightShoulderRoll": 10,
+            "RightShoulderFlex": 132,
+            "RightElbowFlex": 160,
+            "NeckLR": 80
+        }
+        YanAPI.set_servos_angles(six_pose, runtime=speed_ms)
+        time.sleep(speed_ms / 1000.0 + 0.05)
+
+        if not running:
+            break
+
+        # --- Phase "7" : Bras Droit HAUT, Bras Gauche BAS (bras tendus) ---
+        print("[6-7] [%d/%d] ---> SEVEN (Bras droit HAUT / Bras gauche BAS)" % (i, cycles))
+        seven_pose = {
+            "LeftShoulderRoll": 170,
+            "LeftShoulderFlex": 5,
+            "LeftElbowFlex": 20,
+            "RightShoulderRoll": 10,
+            "RightShoulderFlex": 175,
+            "RightElbowFlex": 160,
+            "NeckLR": 100
+        }
+        YanAPI.set_servos_angles(seven_pose, runtime=speed_ms)
+        time.sleep(speed_ms / 1000.0 + 0.05)
+
+    print("[6-7] Geste terminé ! Retour en position neutre.")
+    if REST_ON_EXIT:
+        YanAPI.sync_play_motion(name="reset", speed="normal")
+
+if __name__ == "__main__":
+    init_robot()
+    do_six_seven()
