@@ -12,9 +12,9 @@ import time
 import signal
 import YanAPI
 
-# Paramètres configurables via l'environnement
+# Paramètres configurables via l'environnement (200 ms est la vitesse maximale absolue supportée par le matériel)
 REPETITIONS = int(os.environ.get("GESTURE_REPEAT", "8"))    # Nombre de cycles (6-7)
-STEP_TIME = int(os.environ.get("GESTURE_SPEED_MS", "120"))  # Durée d'un mouvement en ms (vitesse turbo 2x plus rapide)
+STEP_TIME = max(200, int(os.environ.get("GESTURE_SPEED_MS", "200")))  # 200 ms = vitesse max hardware Yanshee
 REST_ON_EXIT = True
 
 running = True
