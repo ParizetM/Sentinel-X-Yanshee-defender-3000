@@ -1,12 +1,15 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <time.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <DHT.h>
 #include <U8g2lib.h>
 #include "secrets.h"
+#include "ca_cert.h"
 
-// Sentinel-X : capteurs (DHT22, MQ-135, PIR) + écran OLED + MQTT.
+// Sentinel-X : capteurs (DHT22, MQ-135, PIR) + écran OLED + MQTT sur TLS (MQTTS).
 // Câblage : voir le mapping matériel (OLED sur D6/D7, D3/D4/D8 libres).
 
 // --- Broches ---
@@ -26,12 +29,19 @@ U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, OLED_SCL, OLED_SDA, U8X8_PIN_N
 
 // --- Réseau ---
 const char* DEVICE_ID = "esp-01";
+
+// Serveur NTP (surchargeable dans secrets.h, ex. l'IP de la passerelle si Internet est filtré)
+#ifndef NTP_SERVER
+#define NTP_SERVER "pool.ntp.org"
+#endif
 char topicTelemetry[48];
 char topicStatus[48];
 char topicCmd[48];
 
-WiFiClient wifiClient;
-PubSubClient mqtt(wifiClient);
+// TLS : le certificat du broker doit être signé par la CA interne (include/ca_cert.h).
+BearSSL::X509List caCert(CA_CERT);
+BearSSL::WiFiClientSecure tlsClient;
+PubSubClient mqtt(tlsClient);
 
 // --- Durées (ms) ---
 const unsigned long PUBLISH_INTERVAL    = 1000;
@@ -181,6 +191,17 @@ void onCommand(char* topic, byte* payload, unsigned int length) {
 
 // ===================== MQTT =====================
 
+// Le TLS vérifie les dates de validité des certificats : il faut une heure correcte.
+// On prend l'heure NTP si elle est arrivée, sinon l'heure de compilation du firmware
+// (suffisant pour être dans la période de validité si le réseau bloque NTP).
+const time_t TIME_VALID_AFTER = 1700000000;  // 2023 : en dessous, l'heure NTP n'est pas encore reçue
+
+time_t tlsTime() {
+  time_t now = time(nullptr);
+  if (now > TIME_VALID_AFTER) return now;
+  return BUILD_EPOCH;
+}
+
 void publishTelemetry() {
   JsonDocument doc;
   doc["device"] = DEVICE_ID;
@@ -211,7 +232,11 @@ void publishTelemetry() {
 }
 
 void connectMqtt() {
-  Serial.printf("[MQTT] connexion a %s:%u ... ", MQTT_HOST, MQTT_PORT);
+  Serial.printf("[MQTT] connexion TLS a %s:%u ... ", MQTT_HOST, MQTT_PORT);
+
+  time_t now = tlsTime();
+  tlsClient.setX509Time(now);
+  if (now == BUILD_EPOCH) Serial.print("(heure NTP absente, heure de compilation utilisee) ");
 
   String clientId = String("sentinelx-") + DEVICE_ID;
   bool ok;
@@ -226,7 +251,13 @@ void connectMqtt() {
     mqtt.publish(topicStatus, "online", true);
     mqtt.subscribe(topicCmd);
   } else {
-    Serial.printf("echec (code %d)\n", mqtt.state());
+    char err[96];
+    int code = tlsClient.getLastSSLError(err, sizeof(err));
+    if (code != 0) {
+      Serial.printf("echec TLS (%d : %s)\n", code, err);
+    } else {
+      Serial.printf("echec (code MQTT %d)\n", mqtt.state());
+    }
   }
 }
 
@@ -237,6 +268,7 @@ void handleNetwork(unsigned long now) {
     if (wifiConnected) {
       Serial.printf("[WiFi] OK, IP : %s, passerelle : %s\n",
                     WiFi.localIP().toString().c_str(), WiFi.gatewayIP().toString().c_str());
+      configTime(0, 0, NTP_SERVER);  // synchro en arrière-plan, non bloquante
     } else {
       Serial.println("[WiFi] deconnecte");
     }
@@ -296,7 +328,7 @@ void drawOled(unsigned long now) {
   }
   u8g2.drawStr(0, 46, line);
 
-  snprintf(line, sizeof(line), "MQTT: %s", mqtt.connected() ? "connecte" : "hors ligne");
+  snprintf(line, sizeof(line), "MQTTS: %s", mqtt.connected() ? "connecte" : "hors ligne");
   u8g2.drawStr(0, 58, line);
 
   u8g2.sendBuffer();
@@ -313,7 +345,7 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println();
-  Serial.println("Sentinel-X - capteurs + MQTT");
+  Serial.println("Sentinel-X - capteurs + MQTTS");
 
   snprintf(topicTelemetry, sizeof(topicTelemetry), "sentinelx/%s/telemetry", DEVICE_ID);
   snprintf(topicStatus, sizeof(topicStatus), "sentinelx/%s/status", DEVICE_ID);
@@ -327,7 +359,17 @@ void setup() {
   WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+  tlsClient.setTrustAnchors(&caCert);
+
+  // BearSSL ne sait pas comparer un nom d'hôte à une IP du certificat (SAN "IP Address").
+  // Avec une IP, on se connecte donc par adresse : la chaîne de certificats reste vérifiée
+  // contre la CA interne, seule la comparaison du nom est sautée. Avec un nom DNS, tout est vérifié.
+  IPAddress brokerIp;
+  if (brokerIp.fromString(MQTT_HOST)) {
+    mqtt.setServer(brokerIp, MQTT_PORT);
+  } else {
+    mqtt.setServer(MQTT_HOST, MQTT_PORT);
+  }
   mqtt.setBufferSize(512);
   mqtt.setCallback(onCommand);
 

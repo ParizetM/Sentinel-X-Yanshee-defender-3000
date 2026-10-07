@@ -5,7 +5,7 @@ L'ESP8266 lit les capteurs (température, humidité, gaz, présence), affiche l'
 et publie toutes les mesures sur le broker MQTT. Le buzzer et la LED ne s'allument **que sur commande MQTT**.
 
 ```
-ESP8266 ──publish──▶ Mosquitto (172.16.137.4:1883) ◀──subscribe── API / IA / Dashboard
+ESP8266 ──publish──▶ Mosquitto (172.16.137.4:8883, TLS) ◀──subscribe── API / IA / Dashboard
         ◀──── cmd ────                                ──── cmd ────
 ```
 
@@ -29,7 +29,7 @@ cp include/secrets.example.h include/secrets.h
 #define WIFI_SSID     "..."          // Wi-Fi 2,4 GHz uniquement
 #define WIFI_PASSWORD "..."
 #define MQTT_HOST "172.16.137.4"
-#define MQTT_PORT 1883
+#define MQTT_PORT 8883              // MQTTS (TLS)
 #define MQTT_USER "..."
 #define MQTT_PASS "..."              // demander à l'équipe infra
 ```
@@ -51,7 +51,7 @@ cp include/secrets.example.h include/secrets.h
    ```
 
 ### Ce qu'on doit voir
-- Moniteur série : `[WiFi] OK, IP : ...`, puis `[MQTT] connexion a 172.16.137.4:1883 ... OK`, puis une ligne `[MQTT] envoye -> {...}` par seconde.
+- Moniteur série : `[WiFi] OK, IP : ...`, puis `[MQTT] connexion TLS a 172.16.137.4:8883 ... OK`, puis une ligne `[MQTT] envoye -> {...}` par seconde.
 - Écran OLED : IP de la carte, température/humidité, gaz, présence, statut MQTT.
 - Pendant la première minute : `Gaz: chauffe` et `PIR: calib.` (normal, voir §3).
 
@@ -118,6 +118,34 @@ d'envoyer la commande buzzer.
 
 Pour suivre tous les boîtiers : s'abonner à `sentinelx/+/telemetry`.
 
+### Chiffrement TLS (MQTTS)
+
+Toute la liaison ESP ↔ broker passe en **TLS 1.2 sur le port 8883**.
+
+- La carte fait confiance **uniquement** à la CA interne de l'infra (`MonInfra Root CA`). Le certificat est dans
+  `cert/ca.crt` et embarqué dans le firmware via `include/ca_cert.h` (public, versionné ; aucune clé privée côté ESP).
+- Le certificat du broker (`CN=mqtt.monInfra.local`, SAN `IP:172.16.137.4`) doit être signé par cette CA, sinon la
+  connexion est refusée : un faux broker (MitM) ne passe pas.
+- **Nom d'hôte** : la lib TLS de l'ESP8266 (BearSSL) ne sait pas comparer une IP aux SAN `IP Address`. Quand
+  `MQTT_HOST` est une IP, la carte se connecte donc par adresse : la chaîne de certificats est vérifiée, la comparaison
+  du nom est sautée. Si on passe à un nom DNS (`mqtt.monInfra.local`), la vérification du nom se fait aussi.
+- **Heure** : TLS vérifie les dates de validité, il faut donc une heure correcte. La carte lance une synchro NTP
+  (`pool.ntp.org`, modifiable avec `NTP_SERVER` dans `secrets.h`) ; si elle n'a pas abouti (Internet filtré au labo),
+  elle utilise **l'heure de compilation du firmware**. Message affiché dans ce cas :
+  `(heure NTP absente, heure de compilation utilisee)`. Normal.
+
+Si l'infra régénère sa CA, remplacer `cert/ca.crt` puis régénérer l'en-tête :
+
+```bash
+{ echo '#pragma once'; echo '#include <pgmspace.h>'; echo 'static const char CA_CERT[] PROGMEM = R"PEM('; cat cert/ca.crt; echo ')PEM";'; } > include/ca_cert.h
+```
+
+Vérifier le certificat présenté par le broker depuis le Mac :
+
+```bash
+openssl s_client -connect 172.16.137.4:8883 -CAfile cert/ca.crt -tls1_2 </dev/null | grep -E "subject|Verify return"
+```
+
 ### Format des mesures
 ```json
 {
@@ -160,14 +188,14 @@ Installer le client : `brew install mosquitto` (ou utiliser [MQTT Explorer](http
 
 ```bash
 # Voir tout le flux
-mosquitto_sub -h 172.16.137.4 -u <user> -P '<mdp>' -t 'sentinelx/#' -v
+mosquitto_sub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t 'sentinelx/#' -v
 
 # Allumer / éteindre
-mosquitto_pub -h 172.16.137.4 -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"on","buzzer":"on"}'
-mosquitto_pub -h 172.16.137.4 -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"off","buzzer":"off"}'
+mosquitto_pub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"on","buzzer":"on"}'
+mosquitto_pub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"off","buzzer":"off"}'
 
 # Vérifier que le broker est joignable
-nc -vz 172.16.137.4 1883
+nc -vz 172.16.137.4 8883
 ```
 
 ### Exemple Python (abonnement)
@@ -182,8 +210,9 @@ def on_message(client, userdata, msg):
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.username_pw_set("<user>", "<mdp>")
+client.tls_set(ca_certs="cert/ca.crt")
 client.on_message = on_message
-client.connect("172.16.137.4", 1883, 60)
+client.connect("172.16.137.4", 8883, 60)
 client.subscribe("sentinelx/+/telemetry")
 client.loop_forever()
 ```
@@ -201,6 +230,9 @@ client.loop_forever()
 | Wi-Fi ne se connecte pas | Nom/mot de passe, et réseau **2,4 GHz** obligatoire. |
 | `[MQTT] ... echec (code -2)` | Broker injoignable : IP, port, ou réseau Wi-Fi qui ne route pas vers 172.16.137.x (`nc -vz` depuis le Mac sur le même Wi-Fi). |
 | `[MQTT] ... echec (code 5)` | Identifiants MQTT refusés. |
+| `echec TLS (... Certificate is expired or not yet valid ...)` | Mauvaise heure : NTP injoignable et firmware compilé avant la création du certificat. Recompiler/téléverser, ou définir `NTP_SERVER` vers un serveur joignable. |
+| `echec TLS (... Chain could not be linked to a trust anchor ...)` | Le broker présente un certificat qui n'est pas signé par `cert/ca.crt` (CA régénérée ? mauvais broker ?). |
+| `echec TLS (... Expected server name was not found ...)` | `MQTT_HOST` est un nom DNS absent du certificat. Utiliser l'IP ou le nom du certificat. |
 | Gaz toujours en `eleve`/`alerte` | Laisser chauffer plusieurs minutes ; la référence se recale seule. Sinon ajuster les seuils (§3). |
 | Deux flux différents sur le même topic | Un autre client publie avec le même `device`. Chaque boîtier doit avoir un `DEVICE_ID` unique. |
 
@@ -211,6 +243,8 @@ client.loop_forever()
 ```
 include/secrets.example.h   modèle des identifiants (versionné)
 include/secrets.h           vrais identifiants (ignoré par git)
+include/ca_cert.h           CA interne embarquée pour le TLS (copie de cert/ca.crt)
+cert/ca.crt                 certificat de la CA interne (public)
 src/main.cpp                firmware complet
 platformio.ini              carte nodemcuv2, librairies
 ```
@@ -223,6 +257,7 @@ Ajouter un second boîtier : changer `DEVICE_ID` (`esp-02`) dans `src/main.cpp`,
 
 ## 7. À faire
 
-- [ ] **MQTTS (TLS, port 8883)** avec le certificat CA embarqué : obligatoire selon le cahier des charges.
+- [x] **MQTTS (TLS, port 8883)** avec le certificat CA embarqué.
+- [ ] Fermer le port MQTT en clair (1883) sur le broker, sinon un client peut encore se connecter sans chiffrement.
 - [ ] Un compte MQTT dédié à l'ESP (`esp`) avec droits limités à `sentinelx/#`, au lieu du compte admin.
 - [ ] Dépôt git + commits réguliers.
