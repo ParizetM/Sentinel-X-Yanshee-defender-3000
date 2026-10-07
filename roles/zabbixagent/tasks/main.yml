@@ -1,0 +1,42 @@
+---
+# Rôle Zabbix agent 2 pour Debian 13
+# Adresse du serveur Zabbix : variable zabbix_server_ip (par défaut 172.16.148.5)
+
+- name: Ajouter le depot Zabbix 7.0
+  ansible.builtin.apt:
+    deb: https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian13_all.deb
+    state: present
+
+- name: Installer Zabbix agent 2
+  ansible.builtin.apt:
+    name: zabbix-agent2
+    state: present
+    update_cache: true
+
+- name: Configurer l'agent (serveur, mode actif, nom d'hote)
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/zabbix_agent2.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - regexp: '^#?\s*Server='
+      line: "Server={{ zabbix_server_ip | default('172.16.137.8') }}"
+    - regexp: '^#?\s*ServerActive='
+      line: "ServerActive={{ zabbix_server_ip | default('172.16.137.8') }}"
+    - regexp: '^#?\s*Hostname='
+      line: "Hostname={{ ansible_facts['hostname'] }}"
+  loop_control:
+    label: "{{ item.line }}"
+  register: zabbixagent_conf
+
+- name: Demarrer et activer Zabbix agent 2
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: started
+    enabled: true
+
+- name: Redemarrer l'agent si sa configuration a changeré
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: restarted
+  when: zabbixagent_conf is changed

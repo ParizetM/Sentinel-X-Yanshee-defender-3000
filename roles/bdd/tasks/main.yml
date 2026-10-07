@@ -1,0 +1,24 @@
+---
+- name: Install mariadb server
+  ansible.builtin.apt:
+    update_cache: yes
+    name: mariadb-server
+    state: latest
+
+- name: Configure mariadb to listen on all interfaces
+  ansible.builtin.lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: "^bind-address.*127.0.0.*$"
+    line: "bind-address = 0.0.0.0"
+  register: mariaconfig
+
+- name: restart mariadb server if config file has been modified
+  ansible.builtin.systemd_service:
+    name: mariadb.service
+    state: restarted
+  when: mariaconfig.changed
+
+- name: Install python3-mysqldb
+  ansible.builtin.apt:
+    name: python3-mysqldb
+    state: present
