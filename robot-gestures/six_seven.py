@@ -13,8 +13,8 @@ import signal
 import YanAPI
 
 # Paramètres configurables via l'environnement
-REPETITIONS = int(os.environ.get("GESTURE_REPEAT", "6"))    # Nombre de cycles (6-7)
-STEP_TIME = int(os.environ.get("GESTURE_SPEED_MS", "240"))  # Durée d'un mouvement en ms (vitesse rapide et incisive)
+REPETITIONS = int(os.environ.get("GESTURE_REPEAT", "8"))    # Nombre de cycles (6-7)
+STEP_TIME = int(os.environ.get("GESTURE_SPEED_MS", "120"))  # Durée d'un mouvement en ms (vitesse turbo 2x plus rapide)
 REST_ON_EXIT = True
 
 running = True
