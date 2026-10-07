@@ -59,11 +59,11 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
         if not running:
             break
 
-        # --- Phase "6" : Épaule Gauche HAUT, Épaule Droite BAS (bras tendus) ---
+        # --- Phase "6" : Bras Gauche HAUT, Bras Droit BAS (opposition de phase) ---
         print("[6-7] [%d/%d] ---> SIX  (Bras gauche HAUT / Bras droit BAS)" % (i, cycles))
         six_pose = {
-            "LeftShoulderRoll": 145,   # monte un peu
-            "RightShoulderRoll": 35,   # descend un peu
+            "LeftShoulderRoll": 145,   # Gauche monte
+            "RightShoulderRoll": 0,    # Droit descend
             "LeftShoulderFlex": 10,    # bras tendu devant
             "RightShoulderFlex": 170,  # bras tendu devant
             "LeftElbowFlex": 90,       # coude 100% droit
@@ -76,11 +76,11 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
         if not running:
             break
 
-        # --- Phase "7" : Épaule Droite HAUT, Épaule Gauche BAS (bras tendus) ---
+        # --- Phase "7" : Bras Droit HAUT, Bras Gauche BAS (opposition de phase) ---
         print("[6-7] [%d/%d] ---> SEVEN (Bras droit HAUT / Bras gauche BAS)" % (i, cycles))
         seven_pose = {
-            "LeftShoulderRoll": 180,   # descend un peu
-            "RightShoulderRoll": 0,    # monte un peu
+            "LeftShoulderRoll": 180,   # Gauche descend
+            "RightShoulderRoll": 35,   # Droit monte
             "LeftShoulderFlex": 10,    # bras tendu devant
             "RightShoulderFlex": 170,  # bras tendu devant
             "LeftElbowFlex": 90,       # coude 100% droit
