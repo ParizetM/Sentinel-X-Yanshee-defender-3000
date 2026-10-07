@@ -1,0 +1,1428 @@
+{
+  "model": {
+    "trained_at": "2026-10-07T14:04:15+00:00",
+    "sklearn": "1.9.1",
+    "real_files": [],
+    "real_seconds": 0,
+    "synthetic_normal_seconds": 84960,
+    "synthetic_incident_seconds": 280800,
+    "fp_rate": 0.0005
+  },
+  "normal": {
+    "hours": 47.2,
+    "false_alerts": 7,
+    "false_alerts_per_hour": 0.1483050847457627,
+    "alerts": [
+      {
+        "hour": 4,
+        "t": 3019,
+        "sensor": "temperature",
+        "diagnosis": "anomalie_inconnue"
+      },
+      {
+        "hour": 20,
+        "t": 1559,
+        "sensor": "humidity",
+        "diagnosis": "anomalie_inconnue"
+      },
+      {
+        "hour": 28,
+        "t": 2822,
+        "sensor": "humidity",
+        "diagnosis": "anomalie_inconnue"
+      },
+      {
+        "hour": 29,
+        "t": 1683,
+        "sensor": "humidity",
+        "diagnosis": "anomalie_inconnue"
+      },
+      {
+        "hour": 33,
+        "t": 2975,
+        "sensor": "humidity",
+        "diagnosis": "humidite"
+      },
+      {
+        "hour": 41,
+        "t": 2895,
+        "sensor": "humidity",
+        "diagnosis": "anomalie_inconnue"
+      },
+      {
+        "hour": 44,
+        "t": 3275,
+        "sensor": "humidity",
+        "diagnosis": "anomalie_inconnue"
+      }
+    ]
+  },
+  "scenarios": {
+    "surchauffe": [
+      {
+        "run": 0,
+        "false_alert_before": 0,
+        "ia_delay_s": 61,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 61,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1419.0,
+        "lead_vs_critical_s": 1358.0,
+        "flagged_after_onset": 0.974
+      },
+      {
+        "run": 1,
+        "false_alert_before": 0,
+        "ia_delay_s": 85,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 85,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1696.0,
+        "lead_vs_critical_s": 1611.0,
+        "flagged_after_onset": 0.963
+      },
+      {
+        "run": 2,
+        "false_alert_before": 0,
+        "ia_delay_s": 147,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 147,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": NaN,
+        "lead_vs_critical_s": NaN,
+        "flagged_after_onset": 0.824
+      },
+      {
+        "run": 3,
+        "false_alert_before": 0,
+        "ia_delay_s": 61,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 61,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1217.0,
+        "lead_vs_critical_s": 1156.0,
+        "flagged_after_onset": 0.975
+      },
+      {
+        "run": 4,
+        "false_alert_before": 0,
+        "ia_delay_s": 139,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 139,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": NaN,
+        "lead_vs_critical_s": NaN,
+        "flagged_after_onset": 0.938
+      },
+      {
+        "run": 5,
+        "false_alert_before": 0,
+        "ia_delay_s": 39,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 39,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 910.0,
+        "lead_vs_critical_s": 871.0,
+        "flagged_after_onset": 0.985
+      },
+      {
+        "run": 6,
+        "false_alert_before": 0,
+        "ia_delay_s": 169,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 169,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1866.0,
+        "lead_vs_critical_s": 1697.0,
+        "flagged_after_onset": 0.902
+      },
+      {
+        "run": 7,
+        "false_alert_before": 0,
+        "ia_delay_s": 91,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 91,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": NaN,
+        "lead_vs_critical_s": NaN,
+        "flagged_after_onset": 0.953
+      },
+      {
+        "run": 8,
+        "false_alert_before": 0,
+        "ia_delay_s": 75,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 75,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1346.0,
+        "lead_vs_critical_s": 1271.0,
+        "flagged_after_onset": 0.969
+      },
+      {
+        "run": 9,
+        "false_alert_before": 0,
+        "ia_delay_s": 51,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 51,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 889.0,
+        "lead_vs_critical_s": 838.0,
+        "flagged_after_onset": 0.979
+      },
+      {
+        "run": 10,
+        "false_alert_before": 0,
+        "ia_delay_s": 59,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 59,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 985.0,
+        "lead_vs_critical_s": 926.0,
+        "flagged_after_onset": 0.975
+      },
+      {
+        "run": 11,
+        "false_alert_before": 0,
+        "ia_delay_s": 47,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 47,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1194.0,
+        "lead_vs_critical_s": 1147.0,
+        "flagged_after_onset": 0.981
+      },
+      {
+        "run": 12,
+        "false_alert_before": 0,
+        "ia_delay_s": 57,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 57,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1092.0,
+        "lead_vs_critical_s": 1035.0,
+        "flagged_after_onset": 0.976
+      },
+      {
+        "run": 13,
+        "false_alert_before": 0,
+        "ia_delay_s": 95,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 95,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1349.0,
+        "lead_vs_critical_s": 1254.0,
+        "flagged_after_onset": 0.958
+      },
+      {
+        "run": 14,
+        "false_alert_before": 0,
+        "ia_delay_s": 87,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 87,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1480.0,
+        "lead_vs_critical_s": 1393.0,
+        "flagged_after_onset": 0.962
+      },
+      {
+        "run": 15,
+        "false_alert_before": 0,
+        "ia_delay_s": 121,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 121,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": NaN,
+        "lead_vs_critical_s": NaN,
+        "flagged_after_onset": 0.942
+      },
+      {
+        "run": 16,
+        "false_alert_before": 0,
+        "ia_delay_s": 67,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 67,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1644.0,
+        "lead_vs_critical_s": 1577.0,
+        "flagged_after_onset": 0.97
+      },
+      {
+        "run": 17,
+        "false_alert_before": 0,
+        "ia_delay_s": 75,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 75,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1822.0,
+        "lead_vs_critical_s": 1747.0,
+        "flagged_after_onset": 0.968
+      },
+      {
+        "run": 18,
+        "false_alert_before": 0,
+        "ia_delay_s": 31,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 31,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1555.0,
+        "lead_vs_critical_s": 1524.0,
+        "flagged_after_onset": 0.99
+      },
+      {
+        "run": 19,
+        "false_alert_before": 0,
+        "ia_delay_s": 51,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 51,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1450.0,
+        "lead_vs_critical_s": 1399.0,
+        "flagged_after_onset": 0.979
+      }
+    ],
+    "fuite_lente": [
+      {
+        "run": 0,
+        "false_alert_before": 0,
+        "ia_delay_s": 56,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 56,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 540,
+        "lead_vs_critical_s": 484,
+        "flagged_after_onset": 0.979
+      },
+      {
+        "run": 1,
+        "false_alert_before": 0,
+        "ia_delay_s": 54,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 54,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 532,
+        "lead_vs_critical_s": 478,
+        "flagged_after_onset": 0.979
+      },
+      {
+        "run": 2,
+        "false_alert_before": 0,
+        "ia_delay_s": 72,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 72,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 690,
+        "lead_vs_critical_s": 618,
+        "flagged_after_onset": 0.97
+      },
+      {
+        "run": 3,
+        "false_alert_before": 0,
+        "ia_delay_s": 54,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 54,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 489,
+        "lead_vs_critical_s": 435,
+        "flagged_after_onset": 0.978
+      },
+      {
+        "run": 4,
+        "false_alert_before": 0,
+        "ia_delay_s": 80,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 80,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 839,
+        "lead_vs_critical_s": 759,
+        "flagged_after_onset": 0.965
+      },
+      {
+        "run": 5,
+        "false_alert_before": 0,
+        "ia_delay_s": 35,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 35,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 505,
+        "lead_vs_critical_s": 470,
+        "flagged_after_onset": 0.987
+      },
+      {
+        "run": 6,
+        "false_alert_before": 0,
+        "ia_delay_s": 94,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 94,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 895,
+        "lead_vs_critical_s": 801,
+        "flagged_after_onset": 0.959
+      },
+      {
+        "run": 7,
+        "false_alert_before": 0,
+        "ia_delay_s": 46,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 46,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 498,
+        "lead_vs_critical_s": 452,
+        "flagged_after_onset": 0.982
+      },
+      {
+        "run": 8,
+        "false_alert_before": 0,
+        "ia_delay_s": 103,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 103,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1017,
+        "lead_vs_critical_s": 914,
+        "flagged_after_onset": 0.957
+      },
+      {
+        "run": 9,
+        "false_alert_before": 0,
+        "ia_delay_s": 62,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 62,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 751,
+        "lead_vs_critical_s": 689,
+        "flagged_after_onset": 0.977
+      },
+      {
+        "run": 10,
+        "false_alert_before": 0,
+        "ia_delay_s": 39,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 49,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 530,
+        "lead_vs_critical_s": 491,
+        "flagged_after_onset": 0.988
+      },
+      {
+        "run": 11,
+        "false_alert_before": 0,
+        "ia_delay_s": 48,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 48,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 466,
+        "lead_vs_critical_s": 418,
+        "flagged_after_onset": 0.981
+      },
+      {
+        "run": 12,
+        "false_alert_before": 0,
+        "ia_delay_s": 60,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 60,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 604,
+        "lead_vs_critical_s": 544,
+        "flagged_after_onset": 0.975
+      },
+      {
+        "run": 13,
+        "false_alert_before": 0,
+        "ia_delay_s": 63,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 63,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 553,
+        "lead_vs_critical_s": 490,
+        "flagged_after_onset": 0.974
+      },
+      {
+        "run": 14,
+        "false_alert_before": 0,
+        "ia_delay_s": 93,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 93,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1399,
+        "lead_vs_critical_s": 1306,
+        "flagged_after_onset": 0.965
+      },
+      {
+        "run": 15,
+        "false_alert_before": 0,
+        "ia_delay_s": 57,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 57,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 668,
+        "lead_vs_critical_s": 611,
+        "flagged_after_onset": 0.978
+      },
+      {
+        "run": 16,
+        "false_alert_before": 0,
+        "ia_delay_s": 90,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 90,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1002,
+        "lead_vs_critical_s": 912,
+        "flagged_after_onset": 0.961
+      },
+      {
+        "run": 17,
+        "false_alert_before": 0,
+        "ia_delay_s": 49,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 49,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 450,
+        "lead_vs_critical_s": 401,
+        "flagged_after_onset": 0.983
+      },
+      {
+        "run": 18,
+        "false_alert_before": 0,
+        "ia_delay_s": 64,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 64,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 598,
+        "lead_vs_critical_s": 534,
+        "flagged_after_onset": 0.974
+      },
+      {
+        "run": 19,
+        "false_alert_before": 0,
+        "ia_delay_s": 95,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 95,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1125,
+        "lead_vs_critical_s": 1030,
+        "flagged_after_onset": 0.962
+      }
+    ],
+    "fuite_rapide": [
+      {
+        "run": 0,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 10,
+        "critical_reached_s": 9,
+        "lead_vs_critical_s": 2,
+        "flagged_after_onset": 0.987
+      },
+      {
+        "run": 1,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 3,
+        "critical_reached_s": 3,
+        "lead_vs_critical_s": -4,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 2,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 10,
+        "critical_reached_s": 9,
+        "lead_vs_critical_s": 2,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 3,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 5,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 4,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 5,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 5,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 1,
+        "critical_reached_s": 0,
+        "lead_vs_critical_s": -7,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 6,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 4,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 7,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 5,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 8,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 3,
+        "critical_reached_s": 2,
+        "lead_vs_critical_s": -5,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 9,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 3,
+        "critical_reached_s": 3,
+        "lead_vs_critical_s": -4,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 10,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 7,
+        "critical_reached_s": 6,
+        "lead_vs_critical_s": -1,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 11,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 5,
+        "critical_reached_s": 5,
+        "lead_vs_critical_s": -2,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 12,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 2,
+        "critical_reached_s": 2,
+        "lead_vs_critical_s": -5,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 13,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 4,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 14,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 3,
+        "critical_reached_s": 3,
+        "lead_vs_critical_s": -4,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 15,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 4,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 16,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 6,
+        "critical_reached_s": 6,
+        "lead_vs_critical_s": -1,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 17,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 4,
+        "critical_reached_s": 4,
+        "lead_vs_critical_s": -3,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 18,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 1,
+        "critical_reached_s": 1,
+        "lead_vs_critical_s": -6,
+        "flagged_after_onset": 1.0
+      },
+      {
+        "run": 19,
+        "false_alert_before": 0,
+        "ia_delay_s": 7,
+        "diagnosis": "fuite_rapide",
+        "diagnosis_delay_s": 7,
+        "critical_level_delay_s": 7,
+        "firmware_delay_s": 7,
+        "critical_reached_s": 6,
+        "lead_vs_critical_s": -1,
+        "flagged_after_onset": 1.0
+      }
+    ],
+    "humidite": [
+      {
+        "run": 0,
+        "false_alert_before": 0,
+        "ia_delay_s": 15,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 23.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.996
+      },
+      {
+        "run": 1,
+        "false_alert_before": 0,
+        "ia_delay_s": 35,
+        "diagnosis": "anomalie_inconnue",
+        "diagnosis_delay_s": NaN,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.007
+      },
+      {
+        "run": 2,
+        "false_alert_before": 0,
+        "ia_delay_s": 11,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 11.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.933
+      },
+      {
+        "run": 3,
+        "false_alert_before": 0,
+        "ia_delay_s": 17,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 31.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.984
+      },
+      {
+        "run": 4,
+        "false_alert_before": 0,
+        "ia_delay_s": 15,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 23.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.977
+      },
+      {
+        "run": 5,
+        "false_alert_before": 0,
+        "ia_delay_s": 9,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 9.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.988
+      },
+      {
+        "run": 6,
+        "false_alert_before": 0,
+        "ia_delay_s": 11,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 11.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.998
+      },
+      {
+        "run": 7,
+        "false_alert_before": 0,
+        "ia_delay_s": 9,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 9.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.997
+      },
+      {
+        "run": 8,
+        "false_alert_before": 0,
+        "ia_delay_s": 35,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 35.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.07
+      },
+      {
+        "run": 9,
+        "false_alert_before": 0,
+        "ia_delay_s": 13,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 13.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.997
+      },
+      {
+        "run": 10,
+        "false_alert_before": 0,
+        "ia_delay_s": 9,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 9.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.999
+      },
+      {
+        "run": 11,
+        "false_alert_before": 0,
+        "ia_delay_s": 19,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 29.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.488
+      },
+      {
+        "run": 12,
+        "false_alert_before": 0,
+        "ia_delay_s": 15,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 23.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.995
+      },
+      {
+        "run": 13,
+        "false_alert_before": 0,
+        "ia_delay_s": 17,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 29.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.7
+      },
+      {
+        "run": 14,
+        "false_alert_before": 0,
+        "ia_delay_s": 19,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 29.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.507
+      },
+      {
+        "run": 15,
+        "false_alert_before": 0,
+        "ia_delay_s": 11,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 11.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.811
+      },
+      {
+        "run": 16,
+        "false_alert_before": 0,
+        "ia_delay_s": 21,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 35.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.833
+      },
+      {
+        "run": 17,
+        "false_alert_before": 0,
+        "ia_delay_s": 13,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 23.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.389
+      },
+      {
+        "run": 18,
+        "false_alert_before": 0,
+        "ia_delay_s": 13,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 13.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.997
+      },
+      {
+        "run": 19,
+        "false_alert_before": 0,
+        "ia_delay_s": 17,
+        "diagnosis": "humidite",
+        "diagnosis_delay_s": 27.0,
+        "critical_level_delay_s": null,
+        "firmware_delay_s": null,
+        "critical_reached_s": null,
+        "lead_vs_critical_s": null,
+        "flagged_after_onset": 0.995
+      }
+    ],
+    "demo": [
+      {
+        "run": 0,
+        "false_alert_before": 0,
+        "ia_delay_s": 73,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 88,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1028,
+        "lead_vs_critical_s": 955,
+        "flagged_after_onset": 0.969
+      },
+      {
+        "run": 1,
+        "false_alert_before": 0,
+        "ia_delay_s": 120,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 120,
+        "critical_level_delay_s": 1166.0,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1487,
+        "lead_vs_critical_s": 1367,
+        "flagged_after_onset": 0.947
+      },
+      {
+        "run": 2,
+        "false_alert_before": 0,
+        "ia_delay_s": 97,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 97,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1145,
+        "lead_vs_critical_s": 1048,
+        "flagged_after_onset": 0.961
+      },
+      {
+        "run": 3,
+        "false_alert_before": 0,
+        "ia_delay_s": 104,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 104,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1041,
+        "lead_vs_critical_s": 937,
+        "flagged_after_onset": 0.954
+      },
+      {
+        "run": 4,
+        "false_alert_before": 0,
+        "ia_delay_s": 81,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 81,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1175,
+        "lead_vs_critical_s": 1094,
+        "flagged_after_onset": 0.965
+      },
+      {
+        "run": 5,
+        "false_alert_before": 0,
+        "ia_delay_s": 75,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 75,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 952,
+        "lead_vs_critical_s": 877,
+        "flagged_after_onset": 0.969
+      },
+      {
+        "run": 6,
+        "false_alert_before": 0,
+        "ia_delay_s": 107,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 107,
+        "critical_level_delay_s": 1650.0,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1245,
+        "lead_vs_critical_s": 1138,
+        "flagged_after_onset": 0.953
+      },
+      {
+        "run": 7,
+        "false_alert_before": 0,
+        "ia_delay_s": 126,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 126,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1238,
+        "lead_vs_critical_s": 1112,
+        "flagged_after_onset": 0.945
+      },
+      {
+        "run": 8,
+        "false_alert_before": 0,
+        "ia_delay_s": 83,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 83,
+        "critical_level_delay_s": 1130.0,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1420,
+        "lead_vs_critical_s": 1337,
+        "flagged_after_onset": 0.964
+      },
+      {
+        "run": 9,
+        "false_alert_before": 0,
+        "ia_delay_s": 89,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 89,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1161,
+        "lead_vs_critical_s": 1072,
+        "flagged_after_onset": 0.963
+      },
+      {
+        "run": 10,
+        "false_alert_before": 0,
+        "ia_delay_s": 117,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 117,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1408,
+        "lead_vs_critical_s": 1291,
+        "flagged_after_onset": 0.948
+      },
+      {
+        "run": 11,
+        "false_alert_before": 0,
+        "ia_delay_s": 101,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 101,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 907,
+        "lead_vs_critical_s": 806,
+        "flagged_after_onset": 0.959
+      },
+      {
+        "run": 12,
+        "false_alert_before": 0,
+        "ia_delay_s": 85,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 85,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 973,
+        "lead_vs_critical_s": 888,
+        "flagged_after_onset": 0.963
+      },
+      {
+        "run": 13,
+        "false_alert_before": 0,
+        "ia_delay_s": 111,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 111,
+        "critical_level_delay_s": 1053.0,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1454,
+        "lead_vs_critical_s": 1343,
+        "flagged_after_onset": 0.95
+      },
+      {
+        "run": 14,
+        "false_alert_before": 0,
+        "ia_delay_s": 94,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 94,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1087,
+        "lead_vs_critical_s": 993,
+        "flagged_after_onset": 0.959
+      },
+      {
+        "run": 15,
+        "false_alert_before": 0,
+        "ia_delay_s": 100,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 100,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1012,
+        "lead_vs_critical_s": 912,
+        "flagged_after_onset": 0.956
+      },
+      {
+        "run": 16,
+        "false_alert_before": 0,
+        "ia_delay_s": 109,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 109,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1174,
+        "lead_vs_critical_s": 1065,
+        "flagged_after_onset": 0.952
+      },
+      {
+        "run": 17,
+        "false_alert_before": 0,
+        "ia_delay_s": 98,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 98,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 963,
+        "lead_vs_critical_s": 865,
+        "flagged_after_onset": 0.957
+      },
+      {
+        "run": 18,
+        "false_alert_before": 0,
+        "ia_delay_s": 106,
+        "diagnosis": "fuite_lente",
+        "diagnosis_delay_s": 106,
+        "critical_level_delay_s": 1151.0,
+        "firmware_delay_s": null,
+        "critical_reached_s": 1308,
+        "lead_vs_critical_s": 1202,
+        "flagged_after_onset": 0.955
+      },
+      {
+        "run": 19,
+        "false_alert_before": 0,
+        "ia_delay_s": 69,
+        "diagnosis": "surchauffe",
+        "diagnosis_delay_s": 69,
+        "critical_level_delay_s": NaN,
+        "firmware_delay_s": null,
+        "critical_reached_s": 980,
+        "lead_vs_critical_s": 911,
+        "flagged_after_onset": 0.97
+      }
+    ]
+  },
+  "real": [
+    {
+      "file": "telemetry.jsonl",
+      "device": "esp-01",
+      "duration_s": 633,
+      "events": [
+        {
+          "index": 2000,
+          "kind": "start",
+          "level": "critical",
+          "sensor": "gas",
+          "diagnosis": "fuite_rapide",
+          "risk": 1.170209601697994,
+          "t": 67
+        },
+        {
+          "index": 2048,
+          "kind": "diagnosis",
+          "level": "critical",
+          "sensor": "temperature",
+          "diagnosis": "surchauffe",
+          "risk": 1.0682649649693734,
+          "t": 115
+        },
+        {
+          "index": 2071,
+          "kind": "diagnosis",
+          "level": "critical",
+          "sensor": "gas",
+          "diagnosis": "fuite_rapide",
+          "risk": 1.999360466022841,
+          "t": 138
+        },
+        {
+          "index": 2341,
+          "kind": "end",
+          "level": "info",
+          "sensor": "temperature",
+          "diagnosis": "fuite_rapide",
+          "risk": 0.8940667865207961,
+          "t": 408
+        },
+        {
+          "index": 2359,
+          "kind": "start",
+          "level": "warning",
+          "sensor": "humidity",
+          "diagnosis": "humidite",
+          "risk": 1.2138796507456278,
+          "t": 426
+        },
+        {
+          "index": 2381,
+          "kind": "escalate",
+          "level": "critical",
+          "sensor": "gas",
+          "diagnosis": "humidite",
+          "risk": 1.2482019976531316,
+          "t": 448
+        },
+        {
+          "index": 2388,
+          "kind": "diagnosis",
+          "level": "critical",
+          "sensor": "gas",
+          "diagnosis": "fuite_rapide",
+          "risk": 1.9996343921726996,
+          "t": 455
+        },
+        {
+          "index": 2441,
+          "kind": "diagnosis",
+          "level": "critical",
+          "sensor": "gas",
+          "diagnosis": "fuite_lente",
+          "risk": 1.610172103515826,
+          "t": 508
+        },
+        {
+          "index": 2492,
+          "kind": "end",
+          "level": "info",
+          "sensor": "gas",
+          "diagnosis": "fuite_lente",
+          "risk": 0.9947419370036173,
+          "t": 559
+        }
+      ],
+      "firmware": [
+        [
+          0,
+          "normal"
+        ],
+        [
+          17,
+          "eleve"
+        ],
+        [
+          18,
+          "alerte"
+        ],
+        [
+          30,
+          "eleve"
+        ],
+        [
+          44,
+          "normal"
+        ],
+        [
+          131,
+          "eleve"
+        ],
+        [
+          132,
+          "alerte"
+        ],
+        [
+          139,
+          "eleve"
+        ],
+        [
+          143,
+          "normal"
+        ],
+        [
+          279,
+          "alerte"
+        ],
+        [
+          288,
+          "eleve"
+        ],
+        [
+          296,
+          "normal"
+        ],
+        [
+          448,
+          "eleve"
+        ],
+        [
+          449,
+          "alerte"
+        ],
+        [
+          460,
+          "eleve"
+        ],
+        [
+          475,
+          "normal"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,95 +1,82 @@
-import paho.mqtt.client as mqtt
+"""
+Collecte de la télémétrie MQTT dans un fichier JSONL (un message par ligne).
+
+Sert à constituer les jeux de données de l'IA :
+  - data/normal_<nom>.jsonl   : boîtier en fonctionnement normal, SANS
+    manipulation (30 à 60 min conseillées) → utilisé par train.py ;
+  - data/test_<nom>.jsonl     : sessions de scénarios (chauffe, gaz...) → evaluate.py.
+
+Configuration du broker : .env (voir .env.example), connexion MQTTS.
+
+Exemples :
+  python data_take.py --out data/normal_salle.jsonl
+  python data_take.py --out data/test_chauffe.jsonl --minutes 20
+"""
+
+from __future__ import annotations
+
+import argparse
 import json
-import csv
-import os
-from datetime import datetime
+import time
+from datetime import datetime, timezone
+from pathlib import Path
 
-# --- Configuration ---
-BROKER = "172.16.137.4"      # ou l'IP de ton broker
-PORT = 1883
-TOPIC = "sentinelx/esp-01/telemetry"       # adapte selon ton topic
-USERNAME = "admin"           # si auth requise
-PASSWORD = "Epsi1234.!"
+from common import SCRIPT_DIR, connect_mqtt, create_mqtt_client, env_str, flatten_record
 
-CSV_FILE = "telemetry.csv"
-JSON_FILE = "telemetry.jsonl"   # JSON Lines : 1 objet par ligne
-BUFFER_SIZE = 1            # écriture par lots pour la perf
 
-# --- Buffers ---
-csv_buffer = []
-json_buffer = []
-csv_header_written = os.path.exists(CSV_FILE)
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    default_out = SCRIPT_DIR / "data" / f"telemetry_{datetime.now():%Y%m%d_%H%M%S}.jsonl"
+    parser.add_argument("--out", type=Path, default=default_out)
+    parser.add_argument("--topic", default=env_str("TELEMETRY_TOPIC", "sentinelx/+/telemetry"))
+    parser.add_argument("--minutes", type=float, default=None, help="arrêt automatique après N minutes")
+    args = parser.parse_args()
 
-# --- Callbacks MQTT ---
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print(f"✅ Connecté au broker {BROKER}:{PORT}")
-        client.subscribe(TOPIC, qos=1)
-        print(f"📡 Abonné à : {TOPIC}")
-    else:
-        print(f"❌ Échec de connexion (code {rc})")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    out = open(args.out, "a", encoding="utf-8", buffering=1)  # une ligne écrite = une ligne sur disque
+    count = 0
 
-def on_message(client, userdata, msg):
+    def on_connect(client, userdata, flags, reason_code, properties=None):
+        if reason_code == 0:
+            print(f"Connecté, abonné à {args.topic}")
+            client.subscribe(args.topic, qos=1)
+        else:
+            print(f"Connexion refusée (code {reason_code})")
+
+    def on_message(client, userdata, msg):
+        nonlocal count
+        try:
+            data = json.loads(msg.payload.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            print(f"Message illisible ignoré sur {msg.topic}")
+            return
+        record = {"received_at": datetime.now(timezone.utc).isoformat(), "topic": msg.topic, **data}
+        out.write(json.dumps(record, ensure_ascii=False) + "\n")
+        count += 1
+        if count % 30 == 1:
+            flat = flatten_record(data)
+            print(f"{count:5d} msg | {flat['device']} uptime={flat['uptime_s']} T={flat['temperature']} "
+                  f"H={flat['humidity']} gaz={flat['gas_raw']} ({flat['gas_level']})")
+
+    client = create_mqtt_client(f"sentinel-collector-{int(time.time())}")
+    client.on_connect = on_connect
+    client.on_message = on_message
+    connect_mqtt(client)
+    client.loop_start()
+
+    print(f"Enregistrement dans {args.out} (Ctrl+C pour arrêter)")
+    deadline = time.monotonic() + args.minutes * 60 if args.minutes else None
     try:
-        payload = msg.payload.decode("utf-8")
-        data = json.loads(payload)   # si le payload est déjà du JSON
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        # sinon on stocke brut
-        data = {"value": msg.payload.decode(errors="ignore")}
+        while deadline is None or time.monotonic() < deadline:
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        client.loop_stop()
+        client.disconnect()
+        out.close()
+        print(f"{count} messages enregistrés dans {args.out}")
 
-    # Ajout de métadonnées utiles pour le ML / le debug
-    record = {
-        "timestamp": datetime.utcnow().isoformat(),
-        # "timestamp": datetime.isoformat(),
-        "topic": msg.topic,
-        **data
-    }
-    print(f"Le record est {record}")
-    csv_buffer.append(record)
-    json_buffer.append(record)
 
-    if len(csv_buffer) >= BUFFER_SIZE:
-        flush_buffers()
-
-def flush_buffers():
-    global csv_header_written
-    if csv_buffer:
-        # Récupère toutes les colonnes rencontrées
-        keys = set()
-        for r in csv_buffer:
-            keys.update(r.keys())
-        fieldnames = sorted(keys)
-
-        with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            if not csv_header_written:
-                writer.writeheader()
-                csv_header_written = True
-            writer.writerows(csv_buffer)
-        csv_buffer.clear()
-
-    if json_buffer:
-        with open(JSON_FILE, "a", encoding="utf-8") as f:
-            for r in json_buffer:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
-        json_buffer.clear()
-
-# --- Client MQTT ---
-client = mqtt.Client(client_id="telemetry_collector")
-if USERNAME:
-    client.username_pw_set(USERNAME, PASSWORD)
-
-client.on_connect = on_connect
-client.on_message = on_message
-
-client.connect(BROKER, PORT, keepalive=60)
-
-try:
-    print("▶️  Collecte en cours (Ctrl+C pour arrêter)...")
-    client.loop_forever()
-except KeyboardInterrupt:
-    print("\n⏹  Arrêt demandé...")
-finally:
-    flush_buffers()       # <-- ne pas oublier le flush final !
-    client.disconnect()
-    print(f"💾 Données sauvegardées dans {CSV_FILE} et {JSON_FILE}")
+if __name__ == "__main__":
+    main()
