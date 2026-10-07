@@ -7,15 +7,16 @@ Fait marcher le robot avec la vraie marche fluide gauche/droite,
 puis demi-tour 180°, et repete dans l'allee.
 """
 
+import os
 import sys
 import time
 import signal
 import YanAPI
 
-# Configuration de la patrouille
-NB_STEPS = 10           # Nombre de pas (demarche complete gauche/droite)
-TURN_STEPS = 4          # Nombre de pas de rotation pour ~180°
-SPEED = "fast"          # very slow, slow, normal, fast, very fast
+# Configuration de la patrouille (surchargeable via variables d'environnement)
+NB_STEPS = int(os.environ.get("PATROL_NB_STEPS", "10"))           # Nombre de pas
+TURN_STEPS = int(os.environ.get("PATROL_TURN_STEPS", "4"))        # Nombre de rotations ~180°
+SPEED = os.environ.get("PATROL_SPEED", "fast")                    # slow, normal, fast, very fast
 
 keep_patrolling = True
 
