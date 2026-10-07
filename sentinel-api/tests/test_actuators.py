@@ -47,3 +47,27 @@ async def test_system_status_and_health(client: AsyncClient):
     status = await client.get("/api/v1/status")
     assert status.status_code == 200
     assert status.json()["api"]["status"] == "online"
+
+
+@pytest.mark.asyncio
+async def test_dashboard_controls(client: AsyncClient):
+    # Test alarm endpoint utilisé par le Dashboard React
+    res_alarm = await client.post("/api/v1/control/alarm")
+    assert res_alarm.status_code == 200
+    assert res_alarm.json()["status"] == "alarm_triggered"
+
+    # Test LED endpoint utilisé par le Dashboard React
+    res_led = await client.post("/api/v1/control/led")
+    assert res_led.status_code == 200
+    assert res_led.json()["status"] == "led_triggered"
+
+
+@pytest.mark.asyncio
+async def test_video_stream_endpoint(client: AsyncClient):
+    from unittest.mock import patch
+    with patch("httpx.AsyncClient.stream", side_effect=Exception("Robot offline")):
+        res = await client.get("/api/v1/video/stream")
+        assert res.status_code == 200
+        assert "multipart/x-mixed-replace" in res.headers["content-type"]
+
+

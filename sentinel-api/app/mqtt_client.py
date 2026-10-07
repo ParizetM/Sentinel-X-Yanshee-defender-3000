@@ -12,6 +12,7 @@ from app.config import settings
 from app.database import async_session_factory
 from app.models.telemetry import Telemetry
 from app.models.alert import Alert
+from app.websocket_manager import ws_manager
 
 logger = logging.getLogger("sentinel.mqtt")
 
@@ -156,6 +157,23 @@ class SentinelMQTTClient:
                 session.add(alert)
 
             await session.commit()
+
+        # Diffusion temps réel aux clients WebSocket connectés (Dashboard)
+        await ws_manager.broadcast({
+            "type": "telemetry",
+            "data": telemetry_record.to_dict()
+        })
+
+        if gas_obj.get("level") == "alerte":
+            await ws_manager.broadcast({
+                "type": "alert",
+                "data": {
+                    "source": "sensor_esp8266",
+                    "alert_type": "gas_leak",
+                    "severity": "critical",
+                    "message": "Fuite de gaz critique détectée"
+                }
+            })
 
         logger.debug(f"[MQTT] Mesure sauvegardée pour {device_id}")
 

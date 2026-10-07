@@ -85,3 +85,49 @@ async def get_audit_logs(
     result = await db.execute(query)
     logs = result.scalars().all()
     return [l.to_dict() for l in logs]
+
+
+# ============================================================
+# Aliases pour le Dashboard Web (/api/v1/control/alarm & led)
+# ============================================================
+
+control_router = APIRouter(prefix="/api/v1/control", tags=["Dashboard Control"])
+
+
+@control_router.post("/alarm", summary="Déclencher l'alarme buzzer")
+async def trigger_alarm(db: AsyncSession = Depends(get_db)):
+    topic = f"{settings.MQTT_CMD_TOPIC_PREFIX}/sentinel-01/cmd"
+    payload = {"buzzer": "on"}
+    published = mqtt_manager.publish_command(topic, payload)
+
+    audit = ActuatorAuditLog(
+        triggered_at=datetime.now(timezone.utc),
+        target="esp8266",
+        device_id="sentinel-01",
+        command_payload=json.dumps(payload),
+        user_identity="dashboard_operator"
+    )
+    db.add(audit)
+    await db.commit()
+
+    return {"status": "alarm_triggered", "published": published}
+
+
+@control_router.post("/led", summary="Toggle statut LED")
+async def toggle_led(db: AsyncSession = Depends(get_db)):
+    topic = f"{settings.MQTT_CMD_TOPIC_PREFIX}/sentinel-01/cmd"
+    payload = {"led": "on"}
+    published = mqtt_manager.publish_command(topic, payload)
+
+    audit = ActuatorAuditLog(
+        triggered_at=datetime.now(timezone.utc),
+        target="esp8266",
+        device_id="sentinel-01",
+        command_payload=json.dumps(payload),
+        user_identity="dashboard_operator"
+    )
+    db.add(audit)
+    await db.commit()
+
+    return {"status": "led_triggered", "published": published}
+

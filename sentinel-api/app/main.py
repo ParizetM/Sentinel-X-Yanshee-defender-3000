@@ -11,7 +11,15 @@ from fastapi.exceptions import RequestValidationError
 from app.config import settings
 from app.database import init_db, engine
 from app.mqtt_client import mqtt_manager
-from app.routers import alerts_router, telemetry_router, actuators_router, status_router
+from app.routers import (
+    alerts_router,
+    telemetry_router,
+    actuators_router,
+    control_router,
+    status_router,
+    websocket_router,
+    video_router
+)
 
 # Configuration des logs
 logging.basicConfig(
@@ -90,7 +98,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 app.include_router(alerts_router)
 app.include_router(telemetry_router)
 app.include_router(actuators_router)
+app.include_router(control_router)
 app.include_router(status_router)
+app.include_router(websocket_router)
+app.include_router(video_router)
 
 
 @app.get("/", include_in_schema=False)

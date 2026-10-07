@@ -11,6 +11,7 @@ from app.database import get_db
 from app.models.alert import Alert
 from app.schemas.alert import AlertCreate, AlertResponse, AlertAcknowledgeRequest
 from app.security.auth import verify_api_key
+from app.websocket_manager import ws_manager
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["Alerts"])
 
@@ -45,7 +46,13 @@ async def create_alert(
     await db.commit()
     await db.refresh(alert)
 
-    return alert.to_dict()
+    alert_dict = alert.to_dict()
+    await ws_manager.broadcast({
+        "type": "alert",
+        "data": alert_dict
+    })
+
+    return alert_dict
 
 
 @router.get(
