@@ -1,8 +1,146 @@
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
   background: #0a0e1a;
   color: #e0e6f0;
+  min-height: 100vh;
+}
+
+.app {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #131829;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #1f2a44;
+}
+
+.header h1 {
+  color: #00e5ff;
+  letter-spacing: 2px;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.online {
+  color: #00ff88;
+}
+
+.status.offline {
+  color: #ff3355;
+}
+
+/* Grille des cartes */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Cartes capteurs */
+.card {
+  background: #131829;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #1f2a44;
+}
+
+.card h3 {
+  color: #8899bb;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card .value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #00e5ff;
+  margin-top: 10px;
+}
+
+.card .value span {
+  font-size: 16px;
+  color: #8899bb;
+}
+
+/* Graphique */
+.chart-container,
+.camera,
+.controls {
+  background: #131829;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #1f2a44;
+  margin-bottom: 20px;
+}
+
+.chart-container h3,
+.camera h3,
+.controls h3 {
+  color: #8899bb;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* Caméra */
+.camera-placeholder {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0e1a;
+  border-radius: 8px;
+  color: #8899bb;
+  border: 2px dashed #1f2a44;
+}
+
+/* Boutons */
+.btn,
+.btn-danger {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn {
+  background: #1f2a44;
+  color: #00e5ff;
+}
+
+.btn-danger {
+  background: #ff3355;
+  color: white;
+}
+
+.btn:hover {
+  background: #2a3a5c;
+}
+
+.btn-danger:hover {
+  background: #ff5577;
 }
