@@ -1,4 +1,4 @@
-"""Client MQTT asynchrone pour l'ingestion des mesures (KAN-31) et l'envoi de commandes (KAN-35)."""
+"""Client MQTT asynchrone pour l'ingestion des mesures (ESP8266) et des détections (Robot/IA)."""
 
 import json
 import ssl
@@ -16,8 +16,12 @@ from app.websocket_manager import ws_manager
 
 logger = logging.getLogger("sentinel.mqtt")
 
-# Stockage en mémoire du dernier statut connu des devices
+# Cache mémoire du statut des équipements
 device_status_cache: Dict[str, Dict[str, Any]] = {}
+
+# Dernière photo binaire JPEG capturée par le robot Yanshee / IA
+latest_photo_cache: Optional[bytes] = None
+latest_photo_timestamp: Optional[str] = None
 
 
 class SentinelMQTTClient:
@@ -25,6 +29,7 @@ class SentinelMQTTClient:
         self.client: Optional[mqtt.Client] = None
         self.loop: Optional[asyncio.AbstractEventLoop] = None
         self.is_connected: bool = False
+        self._last_intrusion_alert_time: float = 0.0
 
     def setup(self, loop: asyncio.AbstractEventLoop):
         self.loop = loop
@@ -71,13 +76,22 @@ class SentinelMQTTClient:
         if rc == 0:
             self.is_connected = True
             logger.info("Connecté au broker MQTT avec succès.")
-            client.subscribe(settings.MQTT_TELEMETRY_TOPIC)
-            client.subscribe(settings.MQTT_STATUS_TOPIC)
-            client.subscribe(settings.MQTT_ROBOT_STATUS_TOPIC)
-            logger.info(f"Abonné aux topics : {settings.MQTT_TELEMETRY_TOPIC}, {settings.MQTT_STATUS_TOPIC}")
+            # Souscriptions ESP8266
+            client.subscribe("sentinelx/+/telemetry")
+            client.subscribe("sentinel/+/telemetry")
+            client.subscribe("sentinelx/+/status")
+            client.subscribe("sentinel/+/status")
+            client.subscribe("sentinel/+/event")
+            # Souscriptions IA / Robot Yanshee (yanshi_video.py)
+            client.subscribe("detection_robot/person_count")
+            client.subscribe("detection_robot/photo")
+            client.subscribe("detection_robot/timestamp")
+            client.subscribe("detection_robot/action")
+            client.subscribe("detection_robot/action_status")
+            logger.info("Abonnements MQTT actifs (ESP8266 + Robot Yanshee IA).")
         else:
             self.is_connected = False
-            logger.warning(f"Échec de connexion MQTT (code retour rc={rc})")
+            logger.warning(f"Échec de connexion MQTT (rc={rc})")
 
     def _on_disconnect(self, client, userdata, disconnect_flags, rc=None, properties=None):
         self.is_connected = False
@@ -85,34 +99,105 @@ class SentinelMQTTClient:
 
     def _on_message(self, client, userdata, msg):
         topic = msg.topic
-        try:
-            payload_str = msg.payload.decode("utf-8")
-        except UnicodeDecodeError:
-            payload_str = ""
+        payload_bytes = msg.payload
 
         if self.loop and self.loop.is_running():
-            asyncio.run_coroutine_threadsafe(self._process_message(topic, payload_str), self.loop)
+            asyncio.run_coroutine_threadsafe(self._process_message(topic, payload_bytes), self.loop)
 
-    async def _process_message(self, topic: str, payload_str: str):
+    async def _process_message(self, topic: str, payload_bytes: bytes):
+        global latest_photo_cache, latest_photo_timestamp
         try:
-            # Traitement Télémétrie : sentinelx/{device}/telemetry
+            # 1. Photo binaire reçue de l'IA (detection_robot/photo)
+            if topic == "detection_robot/photo":
+                latest_photo_cache = payload_bytes
+                logger.info(f"[MQTT] Photo JPEG reçue ({len(payload_bytes)} octets)")
+                return
+
+            # Décoder en texte pour les autres topics
+            try:
+                payload_str = payload_bytes.decode("utf-8").strip()
+            except UnicodeDecodeError:
+                return
+
+            # 2. Télémétrie capteurs ESP8266 : sentinelx/esp-01/telemetry
             if topic.endswith("/telemetry"):
                 await self._handle_telemetry(payload_str)
-            # Traitement Statut : sentinelx/{device}/status
+
+            # 3. Statut de vie boîtier : sentinelx/esp-01/status
             elif topic.endswith("/status"):
                 parts = topic.split("/")
-                device_id = parts[1] if len(parts) > 1 else "unknown"
+                device_id = parts[1] if len(parts) > 1 else "esp-01"
                 device_status_cache[device_id] = {
-                    "status": payload_str.strip(),
+                    "status": payload_str,
                     "last_seen": datetime.now(timezone.utc).isoformat()
                 }
-                logger.info(f"[MQTT] Statut device {device_id} : {payload_str}")
+                logger.info(f"[MQTT] Statut boîtier {device_id} : {payload_str}")
+
+            # 4. Nombre de personnes détectées par l'IA YOLO (detection_robot/person_count)
+            elif topic == "detection_robot/person_count":
+                try:
+                    count = int(payload_str)
+                except ValueError:
+                    count = 0
+
+                device_status_cache["yanshee-01"] = {
+                    "status": "online",
+                    "person_count": count,
+                    "last_seen": datetime.now(timezone.utc).isoformat()
+                }
+
+                # Si personnes détectées > 0 : génération alerte intrusion
+                if count > 0:
+                    now_ts = asyncio.get_event_loop().time()
+                    if now_ts - self._last_intrusion_alert_time >= 5.0:  # anti-rebond 5s
+                        self._last_intrusion_alert_time = now_ts
+                        await self._create_intrusion_alert(count)
+
+            # 5. Timestamp de la photo
+            elif topic == "detection_robot/timestamp":
+                latest_photo_timestamp = payload_str
+
+            # 6. Action robot exécutée (detection_robot/action ou action_status)
+            elif topic.startswith("detection_robot/action"):
+                logger.info(f"[MQTT] Robot action: {payload_str}")
+                await ws_manager.broadcast({
+                    "type": "robot_action",
+                    "topic": topic,
+                    "data": payload_str
+                })
+
         except Exception as e:
-            logger.error(f"Erreur lors du traitement du message MQTT ({topic}): {e}")
+            logger.error(f"Erreur traitement message MQTT ({topic}): {e}")
+
+    async def _create_intrusion_alert(self, count: int):
+        """Enregistre et diffuse une alerte d'intrusion détectée par l'IA YOLO."""
+        alert = Alert(
+            device_id="yanshee-01",
+            created_at=datetime.now(timezone.utc),
+            source="ia_vision",
+            alert_type="human_intrusion",
+            level="alert",
+            value=float(count),
+            message=f"Intrusion détectée : {count} personne(s) identifiée(s) par la caméra",
+            payload_json=json.dumps({"person_count": count, "model": "yolo26n"}),
+            acknowledged=False
+        )
+
+        async with async_session_factory() as session:
+            session.add(alert)
+            await session.commit()
+            await session.refresh(alert)
+            alert_dict = alert.to_dict()
+
+        logger.warning(f"🚨 ALERTE INTRUSION ENREGISTRÉE : {count} personne(s)")
+        await ws_manager.broadcast({
+            "type": "alert",
+            "data": alert_dict
+        })
 
     async def _handle_telemetry(self, payload_str: str):
         data = json.loads(payload_str)
-        device_id = data.get("device", "sentinel-01")
+        device_id = data.get("device") or data.get("device_id") or "esp-01"
 
         # Mise à jour du cache de vie
         device_status_cache[device_id] = {
@@ -123,6 +208,15 @@ class SentinelMQTTClient:
 
         # Parsing capteurs
         gas_obj = data.get("gas", {}) or {}
+        if isinstance(gas_obj, int):
+            gas_raw = gas_obj
+            gas_baseline = None
+            gas_level = "normal"
+        else:
+            gas_raw = gas_obj.get("raw")
+            gas_baseline = gas_obj.get("baseline")
+            gas_level = gas_obj.get("level", "normal")
+
         actuators_obj = data.get("actuators", {}) or {}
 
         telemetry_record = Telemetry(
@@ -131,10 +225,10 @@ class SentinelMQTTClient:
             uptime_s=data.get("uptime_s"),
             temperature=data.get("temperature"),
             humidity=data.get("humidity"),
-            gas_raw=gas_obj.get("raw"),
-            gas_baseline=gas_obj.get("baseline"),
-            gas_level=gas_obj.get("level", "normal"),
-            presence=bool(data.get("presence", False)),
+            gas_raw=gas_raw,
+            gas_baseline=gas_baseline,
+            gas_level=gas_level,
+            presence=bool(data.get("presence", data.get("pir", False))),
             rssi=data.get("rssi"),
             buzzer_state=actuators_obj.get("buzzer", "off"),
             led_state=actuators_obj.get("led", "off")
@@ -143,42 +237,30 @@ class SentinelMQTTClient:
         async with async_session_factory() as session:
             session.add(telemetry_record)
 
-            # Détection automatique de niveau critique de gaz
-            if gas_obj.get("level") == "alerte":
+            # Détection automatique de pic de gaz (niveau "alerte")
+            if gas_level in ["alerte", "alert"]:
                 alert = Alert(
                     device_id=device_id,
-                    source="sensor_esp8266",
+                    source="sensor",
                     alert_type="gas_leak",
-                    severity="critical",
-                    value=float(gas_obj.get("raw", 0)),
-                    message=f"Fuite de gaz critique détectée par le capteur MQ-2 (valeur brute: {gas_obj.get('raw')})",
-                    metadata_json=json.dumps({"gas": gas_obj})
+                    level="alert",
+                    value=float(gas_raw or 0),
+                    message=f"Seuil de gaz critique dépassé sur le capteur MQ-2 (valeur: {gas_raw})",
+                    payload_json=json.dumps({"gas": gas_obj})
                 )
                 session.add(alert)
 
             await session.commit()
 
-        # Diffusion temps réel aux clients WebSocket connectés (Dashboard)
+        # Diffusion temps réel aux clients WebSocket connectés (Dashboard React)
+        tel_dict = telemetry_record.to_dict()
         await ws_manager.broadcast({
             "type": "telemetry",
-            "data": telemetry_record.to_dict()
+            "data": tel_dict
         })
 
-        if gas_obj.get("level") == "alerte":
-            await ws_manager.broadcast({
-                "type": "alert",
-                "data": {
-                    "source": "sensor_esp8266",
-                    "alert_type": "gas_leak",
-                    "severity": "critical",
-                    "message": "Fuite de gaz critique détectée"
-                }
-            })
-
-        logger.debug(f"[MQTT] Mesure sauvegardée pour {device_id}")
-
     def publish_command(self, topic: str, payload: dict) -> bool:
-        """Publie une commande MQTT (ex: vers ESP8266 ou Robot)."""
+        """Publie une commande MQTT vers l'ESP8266 ou le Robot."""
         if not self.client or not self.is_connected:
             logger.warning("Publication MQTT ignorée : client non connecté.")
             return False

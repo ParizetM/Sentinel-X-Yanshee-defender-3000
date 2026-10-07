@@ -14,11 +14,13 @@ from app.mqtt_client import mqtt_manager
 from app.routers import (
     alerts_router,
     telemetry_router,
+    measurements_router,
     actuators_router,
     control_router,
     status_router,
     websocket_router,
-    video_router
+    video_router,
+    auth_router
 )
 
 # Configuration des logs
@@ -97,11 +99,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Inclusion des sous-routeurs
 app.include_router(alerts_router)
 app.include_router(telemetry_router)
+app.include_router(measurements_router)
 app.include_router(actuators_router)
 app.include_router(control_router)
 app.include_router(status_router)
 app.include_router(websocket_router)
 app.include_router(video_router)
+app.include_router(auth_router)
 
 
 @app.get("/", include_in_schema=False)

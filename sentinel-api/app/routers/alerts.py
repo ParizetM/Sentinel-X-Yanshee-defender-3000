@@ -1,4 +1,4 @@
-"""Routeur pour la gestion des alertes (KAN-32 - POST /api/v1/alerts imposé par le sujet)."""
+"""Routeur pour la gestion des alertes (Contrat d'interface §4.4 & KAN-32 : POST /api/v1/alerts)."""
 
 import json
 from datetime import datetime, timezone
@@ -20,25 +20,45 @@ router = APIRouter(prefix="/api/v1/alerts", tags=["Alerts"])
     "",
     response_model=AlertResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Point d'entrée obligatoire de réception des alertes",
-    description="Réceptionne les alertes des capteurs ESP8266, de l'IA (YOLO intrusion, anomalies cinétiques) ou manuelles."
+    summary="Point d'entrée obligatoire de réception des alertes (Sujet Sentinel-X)",
+    description="Réceptionne les changements d'état des capteurs (ESP8266) et les alertes d'intrusion (IA)."
 )
 async def create_alert(
     payload: AlertCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    """Enregistre une alerte et retourne l'objet créé avec code HTTP 201."""
-    metadata_str = json.dumps(payload.metadata) if payload.metadata else None
+    """Enregistre une alerte ou changement d'état et diffuse l'événement en direct."""
+    # Gestion de l'horodatage
+    recorded_at = datetime.now(timezone.utc)
+    if payload.ts:
+        if isinstance(payload.ts, datetime):
+            recorded_at = payload.ts
+        elif isinstance(payload.ts, str):
+            try:
+                recorded_at = datetime.fromisoformat(payload.ts.replace("Z", "+00:00"))
+            except Exception:
+                pass
+
+    # Collecte du payload complet (incluant les champs supplémentaires)
+    full_payload = {}
+    if payload.payload:
+        full_payload.update(payload.payload)
+    # Récupérer les attributs extras si existants
+    extra_fields = getattr(payload, "__pydantic_extra__", None)
+    if extra_fields:
+        full_payload.update(extra_fields)
+
+    payload_str = json.dumps(full_payload) if full_payload else None
 
     alert = Alert(
-        device_id=payload.device_id,
-        created_at=datetime.now(timezone.utc),
-        source=payload.source,
-        alert_type=payload.alert_type,
-        severity=payload.severity,
+        device_id=payload.device_id or "esp-01",
+        created_at=recorded_at,
+        source=payload.source or "sensor",
+        alert_type=payload.alert_type or "general",
+        level=payload.level or "warning",
         value=payload.value,
-        message=payload.message,
-        metadata_json=metadata_str,
+        message=payload.message or "Alerte générée",
+        payload_json=payload_str,
         acknowledged=False
     )
 
@@ -47,6 +67,8 @@ async def create_alert(
     await db.refresh(alert)
 
     alert_dict = alert.to_dict()
+
+    # Diffusion immédiate aux dashboards connectés via WebSocket
     await ws_manager.broadcast({
         "type": "alert",
         "data": alert_dict
@@ -62,15 +84,20 @@ async def create_alert(
     description="Permet au dashboard de lister les alertes récentes avec filtres optionnels."
 )
 async def get_alerts(
-    severity: Optional[str] = Query(None, description="Filtrer par sévérité (low, medium, high, critical)"),
+    level: Optional[str] = Query(None, description="Filtrer par niveau (info, warning, alert, critical)"),
+    severity: Optional[str] = Query(None, description="Alias pour level"),
+    source: Optional[str] = Query(None, description="Filtrer par source (sensor, ia_vision, etc.)"),
     acknowledged: Optional[bool] = Query(None, description="Filtrer par statut d'acquittement"),
     limit: int = Query(50, ge=1, le=500, description="Nombre maximum de résultats"),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Alert).order_by(desc(Alert.created_at)).limit(limit)
 
-    if severity:
-        query = query.where(Alert.severity == severity)
+    target_level = level or severity
+    if target_level:
+        query = query.where(Alert.level == target_level)
+    if source:
+        query = query.where(Alert.source == source)
     if acknowledged is not None:
         query = query.where(Alert.acknowledged == acknowledged)
 
@@ -98,7 +125,7 @@ async def acknowledge_alert(
     if not alert:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Alerte avec l'id {alert_id} non trouvée"
+            detail=f"Alerte #{alert_id} introuvable"
         )
 
     alert.acknowledged = True
