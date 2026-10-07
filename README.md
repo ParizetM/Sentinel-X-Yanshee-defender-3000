@@ -181,11 +181,16 @@ C'est le risque n°1 du projet : sans contrat partagé dès lundi, l'intégratio
 }
 ```
 
-### 4.3 Payload de commande **[PROPOSITION]**
+### 4.3 Payload de commande **[IMPLÉMENTÉ côté firmware]**
 
 ```json
-{ "target": "buzzer", "state": "on", "duration_ms": 3000 }
+{ "target": "buzzer", "state": "toggle", "duration_ms": 3000 }
 ```
+
+- `target` : `buzzer` | `led` | `all`
+- `state` : `toggle` (défaut, la même commande démarre puis arrête le mode alerte) | `on` | `off`
+- `duration_ms` : optionnel, arrêt automatique
+- Mode alerte : bip d'une seconde sur l'autre, LED qui clignote en synchro. Détail dans `sentinel-x-firmware/README.md`.
 
 ### 4.4 Routes API **[PROPOSITION]**
 

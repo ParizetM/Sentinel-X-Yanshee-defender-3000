@@ -75,9 +75,17 @@ bool presence = false;
 bool lastPresence = false;
 
 // --- Actionneurs (pilotés par sentinelx/<device>/cmd) ---
-// Éteints au démarrage, ils ne changent que sur commande : aucun déclenchement automatique.
-bool buzzerOn = false;
-bool ledOn = false;
+// Mode alerte : le buzzer bipe une fois par seconde, la LED clignote au même rythme.
+// Inactifs au démarrage, ils ne changent que sur commande : aucun déclenchement automatique.
+const unsigned long ALERT_PERIOD = 1000;  // un cycle par seconde
+const unsigned long BEEP_ON      = 200;   // durée du bip au début de chaque cycle
+const unsigned long LED_ON       = 500;   // durée d'allumage de la LED au début de chaque cycle
+
+bool buzzerAlert = false;
+bool ledAlert = false;
+unsigned long buzzerUntil = 0;  // arrêt automatique (0 = jusqu'à nouvel ordre)
+unsigned long ledUntil = 0;
+unsigned long alertStart = 0;   // origine commune des cycles : bip et LED restent synchronisés
 
 unsigned long lastPublish = 0, lastReconnect = 0, lastDht = 0, lastGasSample = 0, lastGas = 0, lastOled = 0;
 bool wifiWasConnected = false;
@@ -167,7 +175,17 @@ void readPir(unsigned long now) {
 
 // ===================== Actionneurs =====================
 
-// Format attendu : {"buzzer":"on|off","led":"on|off"} (une seule clé suffit)
+// Format attendu (contrat d'interface §4.3) :
+//   {"target": "buzzer" | "led" | "all", "state": "toggle" | "on" | "off", "duration_ms": 10000}
+// - state absent ou "toggle" : la même commande démarre puis arrête le mode alerte
+// - "on" / "off" : force l'état (utile pour un bouton « tout arrêter »)
+// - duration_ms (optionnel, avec on/toggle) : arrêt automatique après ce délai
+void setAlert(bool& alert, unsigned long& until, bool enable, unsigned long durationMs, unsigned long now) {
+  if (enable && !buzzerAlert && !ledAlert) alertStart = now;  // premier actionneur activé : nouveau cycle
+  alert = enable;
+  until = (enable && durationMs > 0) ? now + durationMs : 0;
+}
+
 void onCommand(char* topic, byte* payload, unsigned int length) {
   JsonDocument doc;
   DeserializationError err = deserializeJson(doc, payload, length);
@@ -176,17 +194,47 @@ void onCommand(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
-  auto apply = [&](const char* key, int pin, bool& state) {
-    const char* value = doc[key] | "";
-    if (strcmp(value, "on") == 0)       state = true;
-    else if (strcmp(value, "off") == 0) state = false;
-    else return;
-    digitalWrite(pin, state);
-  };
-  apply("buzzer", BUZZER_PIN, buzzerOn);
-  apply("led", LED_PIN, ledOn);
+  const char* target = doc["target"] | "";
+  const char* state = doc["state"] | "toggle";
+  unsigned long durationMs = doc["duration_ms"] | 0UL;
 
-  Serial.printf("[CMD] buzzer=%s led=%s\n", buzzerOn ? "on" : "off", ledOn ? "on" : "off");
+  bool all = strcmp(target, "all") == 0;
+  bool forBuzzer = all || strcmp(target, "buzzer") == 0;
+  bool forLed = all || strcmp(target, "led") == 0;
+  if (!forBuzzer && !forLed) {
+    Serial.printf("[CMD] target inconnu : \"%s\"\n", target);
+    return;
+  }
+
+  bool enable;
+  if (strcmp(state, "on") == 0) {
+    enable = true;
+  } else if (strcmp(state, "off") == 0) {
+    enable = false;
+  } else if (strcmp(state, "toggle") == 0) {
+    // Avec "all", on bascule l'ensemble : si l'un des deux est en alerte, tout s'arrête.
+    bool active = (forBuzzer && buzzerAlert) || (forLed && ledAlert);
+    enable = !active;
+  } else {
+    Serial.printf("[CMD] state inconnu : \"%s\"\n", state);
+    return;
+  }
+
+  unsigned long now = millis();
+  if (forBuzzer) setAlert(buzzerAlert, buzzerUntil, enable, durationMs, now);
+  if (forLed)    setAlert(ledAlert, ledUntil, enable, durationMs, now);
+
+  Serial.printf("[CMD] alerte buzzer=%s led=%s\n", buzzerAlert ? "on" : "off", ledAlert ? "on" : "off");
+}
+
+// Fait vivre le mode alerte sans bloquer la boucle (pas de delay()).
+void updateActuators(unsigned long now) {
+  if (buzzerAlert && buzzerUntil && (long)(now - buzzerUntil) >= 0) buzzerAlert = false;
+  if (ledAlert && ledUntil && (long)(now - ledUntil) >= 0) ledAlert = false;
+
+  unsigned long phase = (now - alertStart) % ALERT_PERIOD;
+  digitalWrite(BUZZER_PIN, buzzerAlert && phase < BEEP_ON);
+  digitalWrite(LED_PIN, ledAlert && phase < LED_ON);
 }
 
 // ===================== MQTT =====================
@@ -221,8 +269,8 @@ void publishTelemetry() {
   doc["presence"] = presence;
   doc["rssi"] = WiFi.RSSI();
   JsonObject a = doc["actuators"].to<JsonObject>();
-  a["buzzer"] = buzzerOn ? "on" : "off";
-  a["led"] = ledOn ? "on" : "off";
+  a["buzzer"] = buzzerAlert ? "alert" : "off";
+  a["led"] = ledAlert ? "alert" : "off";
 
   char buffer[384];
   serializeJson(doc, buffer, sizeof(buffer));
@@ -398,6 +446,7 @@ void loop() {
   }
 
   handleNetwork(now);
+  updateActuators(now);
 
   if (now - lastOled >= OLED_INTERVAL) {
     lastOled = now;

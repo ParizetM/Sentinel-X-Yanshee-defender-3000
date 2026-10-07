@@ -156,7 +156,7 @@ openssl s_client -connect 172.16.137.4:8883 -CAfile cert/ca.crt -tls1_2 </dev/nu
   "gas": { "raw": 204, "baseline": 204, "level": "normal" },
   "presence": false,
   "rssi": -73,
-  "actuators": { "buzzer": "off", "led": "off" }
+  "actuators": { "buzzer": "off", "led": "alert" }
 }
 ```
 
@@ -168,20 +168,36 @@ openssl s_client -connect 172.16.137.4:8883 -CAfile cert/ca.crt -tls1_2 </dev/nu
 | `gas.level` | `chauffe` \| `normal` \| `eleve` \| `alerte` |
 | `presence` | PIR, `false` pendant la calibration |
 | `rssi` | qualité Wi-Fi en dBm (en dessous de −75, rapprocher la carte du point d'accès) |
-| `actuators` | état actuel du buzzer et de la LED |
+| `actuators` | mode du buzzer et de la LED : `alert` ou `off` |
 
 Pas d'horodatage dans le message : **le serveur horodate à la réception**.
 
-### Commandes buzzer / LED
+### Commandes buzzer / LED (mode alerte)
+
+En mode alerte, le **buzzer bipe une fois par seconde** (bip de 200 ms) et la **LED clignote au même rythme**
+(allumée 500 ms par seconde). Les deux restent synchronisés quand ils sont actifs ensemble.
+
+Format (contrat d'interface §4.3), publié sur `sentinelx/esp-01/cmd` :
+
 ```json
-{"buzzer": "on"}
-{"led": "off"}
-{"led": "on", "buzzer": "on"}
+{ "target": "all" }
+{ "target": "buzzer", "state": "toggle" }
+{ "target": "led", "state": "on", "duration_ms": 10000 }
+{ "target": "all", "state": "off" }
 ```
-- Valeurs acceptées : `on` / `off`. Tout le reste est ignoré.
-- Au démarrage, buzzer et LED sont **éteints**.
-- La carte confirme l'état appliqué dans `actuators` du message suivant.
-- Si la commande est envoyée en *retained*, la carte la réapplique après un redémarrage.
+
+| Champ | Valeurs | Rôle |
+|---|---|---|
+| `target` | `buzzer` \| `led` \| `all` | actionneur(s) visé(s), obligatoire |
+| `state` | `toggle` (défaut) \| `on` \| `off` | `toggle` : **la même commande démarre puis arrête l'alerte**. `on`/`off` : force l'état (bouton « tout arrêter », API qui veut un résultat certain) |
+| `duration_ms` | entier, optionnel | arrêt automatique après ce délai (avec `on` ou un `toggle` qui démarre) |
+
+- Avec `"target": "all"` en `toggle` : si l'un des deux est en alerte, tout s'arrête ; sinon les deux démarrent.
+- Au démarrage de la carte, aucune alerte n'est active.
+- La carte confirme l'état dans `actuators` du message de télémétrie suivant (`"alert"` ou `"off"`).
+- **Ne pas publier de `toggle` en *retained*** : la carte la rejouerait à chaque reconnexion et inverserait l'état.
+  Pour un état qui doit survivre à un redémarrage, utiliser `on`/`off`.
+- Commande invalide (`target` ou `state` inconnu, JSON cassé) : ignorée, message `[CMD] ...` sur le port série.
 
 ### Commandes utiles depuis le Mac
 Installer le client : `brew install mosquitto` (ou utiliser [MQTT Explorer](https://mqtt-explorer.com/)).
@@ -190,9 +206,9 @@ Installer le client : `brew install mosquitto` (ou utiliser [MQTT Explorer](http
 # Voir tout le flux
 mosquitto_sub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t 'sentinelx/#' -v
 
-# Allumer / éteindre
-mosquitto_pub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"on","buzzer":"on"}'
-mosquitto_pub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"off","buzzer":"off"}'
+# Démarrer puis arrêter le mode alerte (même commande), forcer l'arrêt
+mosquitto_pub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"target":"all"}'
+mosquitto_pub -h 172.16.137.4 -p 8883 --cafile cert/ca.crt -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"target":"all","state":"off"}'
 
 # Vérifier que le broker est joignable
 nc -vz 172.16.137.4 8883
