@@ -1,13 +1,13 @@
-"""Tests unitaires pour la télémétrie capteurs (KAN-31, KAN-33)."""
+"""Tests unitaires pour les mesures et la télémétrie capteurs (Contrat §4.4, KAN-31, KAN-33)."""
 
 import pytest
 from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_ingest_and_get_telemetry(client: AsyncClient):
+async def test_ingest_and_get_telemetry_and_measurements(client: AsyncClient):
     payload = {
-        "device": "sentinel-01",
+        "device": "esp-01",
         "uptime_s": 240,
         "temperature": 21.5,
         "humidity": 48.0,
@@ -30,12 +30,17 @@ async def test_ingest_and_get_telemetry(client: AsyncClient):
     assert post_res.json()["temperature"] == 21.5
 
     # Consultation dernière mesure
-    latest_res = await client.get("/api/v1/telemetry/latest?device_id=sentinel-01")
+    latest_res = await client.get("/api/v1/telemetry/latest?device_id=esp-01")
     assert latest_res.status_code == 200
-    assert latest_res.json()["device_id"] == "sentinel-01"
+    assert latest_res.json()["device_id"] == "esp-01"
     assert latest_res.json()["presence"] is True
 
-    # Consultation historique
-    hist_res = await client.get("/api/v1/telemetry/history?device_id=sentinel-01&limit=10")
-    assert hist_res.status_code == 200
-    assert len(hist_res.json()) >= 1
+    # Consultation endpoint officiel du contrat §4.4 : /api/v1/measurements
+    meas_res = await client.get("/api/v1/measurements?device_id=esp-01&limit=10")
+    assert meas_res.status_code == 200
+    data = meas_res.json()
+    assert len(data) >= 1
+    # Vérification présence des clés pour le Dashboard React (time, temp, pir)
+    assert "temp" in data[0]
+    assert "pir" in data[0]
+    assert "time" in data[0]

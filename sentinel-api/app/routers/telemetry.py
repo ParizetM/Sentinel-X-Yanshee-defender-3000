@@ -1,4 +1,4 @@
-"""Routeur pour la télémétrie des capteurs (KAN-31, KAN-33)."""
+"""Routeur pour les mesures et la télémétrie des capteurs (Contrat §4.4, KAN-31, KAN-33)."""
 
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -11,6 +11,7 @@ from app.models.telemetry import Telemetry
 from app.schemas.telemetry import TelemetryResponse, TelemetryPayload
 
 router = APIRouter(prefix="/api/v1/telemetry", tags=["Telemetry"])
+measurements_router = APIRouter(prefix="/api/v1/measurements", tags=["Measurements (Contrat §4.4)"])
 
 
 @router.get(
@@ -39,20 +40,42 @@ async def get_latest_telemetry(
     return record.to_dict()
 
 
+@measurements_router.get(
+    "",
+    response_model=List[TelemetryResponse],
+    summary="Historique des mesures pour graphiques (Contrat §4.4)",
+    description="Retourne les séries temporelles pour tracer les courbes de température, humidité et gaz."
+)
 @router.get(
     "/history",
     response_model=List[TelemetryResponse],
-    summary="Historique des mesures pour graphiques",
-    description="Retourne les séries temporelles pour tracer les courbes de température, humidité et gaz."
+    summary="Historique des mesures (alias télémétrie)",
+    include_in_schema=False
 )
-async def get_telemetry_history(
-    device_id: Optional[str] = Query(None, description="Identifiant du boîtier"),
+async def get_measurements_history(
+    device_id: Optional[str] = Query(None, description="Identifiant du boîtier (esp-01)"),
+    from_date: Optional[str] = Query(None, alias="from", description="Date de début ISO 8601"),
+    to_date: Optional[str] = Query(None, alias="to", description="Date de fin ISO 8601"),
     limit: int = Query(100, ge=1, le=1000, description="Nombre max de points de mesure"),
     db: AsyncSession = Depends(get_db)
 ):
     query = select(Telemetry).order_by(desc(Telemetry.recorded_at)).limit(limit)
     if device_id:
         query = query.where(Telemetry.device_id == device_id)
+
+    if from_date:
+        try:
+            dt_from = datetime.fromisoformat(from_date.replace("Z", "+00:00"))
+            query = query.where(Telemetry.recorded_at >= dt_from)
+        except Exception:
+            pass
+
+    if to_date:
+        try:
+            dt_to = datetime.fromisoformat(to_date.replace("Z", "+00:00"))
+            query = query.where(Telemetry.recorded_at <= dt_to)
+        except Exception:
+            pass
 
     result = await db.execute(query)
     records = result.scalars().all()
