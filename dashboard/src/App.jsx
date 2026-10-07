@@ -1,41 +1,107 @@
 import { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import Header from './components/layout/header.jsx';
+import AlertBanner from './components/layout/alertBanner.jsx';
+import AlertsBlock from './components/alerts/AlertsBlock.jsx';
+import IABlock from './components/ia/IABlock';
+import SensorsBlock from './components/sensors/SensorsBlock';
+
+const CAMERA_URL = import.meta.env.VITE_CAMERA_URL || 'http://localhost:5000/video_feed';
 
 function App() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({
+    temperature: 0,
+    humidity: 0,
+    gas: 0,
+    pir: false,
+    rssi: -60,
+  });
 
-  // Simulation de données (en attendant le vrai WebSocket)
+  const [history, setHistory] = useState([]);
+  const [ia, setIA] = useState({
+    personCount: 0,
+    detectionsLastHour: 0,
+    robotActions: [],
+    photos: [],
+    sensorDetections: [],
+  });
+  const [alerts, setAlerts] = useState([]);
+  const [connected, setConnected] = useState(false);
+
+  // SIMULATION — à remplacer par WebSocket plus tard
   useEffect(() => {
     const interval = setInterval(() => {
-      setData((prev) => [
+      const newData = {
+        temperature: 22 + Math.random() * 4,
+        humidity: 40 + Math.random() * 20,
+        gas: 100 + Math.random() * 400,
+        pir: Math.random() > 0.7,
+        rssi: -50 - Math.random() * 30,
+      };
+
+      setData(newData);
+      setConnected(true);
+
+      setHistory((prev) => [
         ...prev.slice(-30),
         {
           time: new Date().toLocaleTimeString(),
-          temp: 22 + Math.random() * 4,
-          gas: 100 + Math.random() * 50,
+          temp: newData.temperature,
+          humidity: newData.humidity,
+          gas: newData.gas,
+          rssi: newData.rssi,
         },
       ]);
+
+      setIA((prev) => ({
+        ...prev,
+        personCount: Math.floor(Math.random() * 4),
+        detectionsLastHour: prev.detectionsLastHour + (Math.random() > 0.9 ? 1 : 0),
+        robotActions: [
+          {
+            time: new Date().toLocaleTimeString(),
+            action: 'Scan zone',
+          },
+          ...prev.robotActions.slice(0, 4),
+        ],
+        photos: prev.photos,
+        sensorDetections: [
+          {
+            sensor: 'PIR',
+            value: newData.pir ? 'Présence' : 'Aucune',
+            time: new Date().toLocaleTimeString(),
+          },
+          ...prev.sensorDetections.slice(0, 4),
+        ],
+      }));
+
+      if (newData.gas > 400) {
+        setAlerts((prev) => [
+          {
+            id: Date.now(),
+            time: new Date().toLocaleTimeString(),
+            level: 'critical',
+            source: 'sensor',
+            message: `Gaz élevé : ${newData.gas.toFixed(0)} ppm`,
+          },
+          ...prev.slice(0, 9),
+        ]);
+      }
     }, 1000);
+
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div style={{ padding: 20, background: '#0a0e1a', minHeight: '100vh', color: '#e0e6f0' }}>
-      <h1 style={{ color: '#00e5ff' }}>SENTINEL-X</h1>
-      <h3>Température & Gaz temps réel</h3>
+  const criticalAlert = alerts.find((a) => a.level === 'critical');
 
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={data}>
-          <CartesianGrid stroke="#1f2a44" />
-          <XAxis dataKey="time" stroke="#8899bb" />
-          <YAxis stroke="#8899bb" />
-          <Tooltip
-            contentStyle={{ background: '#131829', border: '1px solid #1f2a44' }}
-          />
-          <Line type="monotone" dataKey="temp" stroke="#00e5ff" strokeWidth={2} name="Température" />
-          <Line type="monotone" dataKey="gas" stroke="#ff3355" strokeWidth={2} name="Gaz" />
-        </LineChart>
-      </ResponsiveContainer>
+  return (
+    <div className="app">
+      <Header connected={connected} />
+      {criticalAlert && <AlertBanner alert={criticalAlert} />}
+
+      {/* ORDRE : Alertes → IA → Capteurs */}
+      <AlertsBlock alerts={alerts} />
+      <IABlock ia={ia} cameraUrl={CAMERA_URL} />
+      <SensorsBlock data={data} history={history} />
     </div>
   );
 }

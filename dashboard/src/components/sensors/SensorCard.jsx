@@ -1,6 +1,6 @@
-function SensorCard({ title, value, unit }) {
+function SensorCard({ title, value, unit, alert = false }) {
   return (
-    <div className="card">
+    <div className={`card ${alert ? 'card-alert' : ''}`}>
       <h3>{title}</h3>
       <p className="value">
         {value} <span>{unit}</span>
