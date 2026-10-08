@@ -2,6 +2,7 @@
 
 import json
 import ssl
+import base64
 import asyncio
 import logging
 from typing import Optional, Dict, Any
@@ -127,12 +128,13 @@ class SentinelMQTTClient:
                 # Sauvegarde en Base de Données MariaDB Galera
                 photo_id = None
                 try:
+                    b64_str = base64.b64encode(payload_bytes).decode("utf-8")
                     async with async_session_factory() as session:
                         p_entry = CapturedPhoto(
                             device_id="yanshee-01",
                             captured_at=datetime.now(timezone.utc),
                             person_count=device_status_cache.get("yanshee-01", {}).get("person_count", 1),
-                            image_bytes=payload_bytes,
+                            image_base64=b64_str,
                             content_type="image/jpeg"
                         )
                         session.add(p_entry)

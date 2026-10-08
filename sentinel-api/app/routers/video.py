@@ -120,7 +120,7 @@ async def get_photo_by_id(
     result = await db.execute(query)
     photo = result.scalar_one_or_none()
 
-    if not photo or not photo.image_bytes:
+    if not photo or not photo.image_base64:
         raise HTTPException(
             status_code=404,
             detail=f"Photo #{photo_id} introuvable en base de données"
@@ -130,8 +130,11 @@ async def get_photo_by_id(
     if photo.captured_at:
         headers["X-Capture-Timestamp"] = photo.captured_at.isoformat()
 
+    import base64
+    raw_bytes = base64.b64decode(photo.image_base64)
+
     return Response(
-        content=photo.image_bytes,
+        content=raw_bytes,
         media_type=photo.content_type or "image/jpeg",
         headers=headers
     )
