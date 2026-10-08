@@ -38,10 +38,17 @@ async def send_command(
         esp_target = "all" if target == "esp8266" else target
         topic = f"{settings.MQTT_CMD_TOPIC_PREFIX}/{device_id}/cmd"
 
+        state_val = (request.state or "toggle").lower()
         payload_to_mqtt = {
             "target": esp_target,
-            "state": request.state or "toggle"
+            "state": state_val
         }
+        # Clés directes pour compatibilité universelle firmware ({"buzzer": "on"}, {"led": "on"})
+        if esp_target in ("buzzer", "all"):
+            payload_to_mqtt["buzzer"] = state_val
+        if esp_target in ("led", "all"):
+            payload_to_mqtt["led"] = state_val
+
         if request.duration_ms:
             payload_to_mqtt["duration_ms"] = request.duration_ms
 
