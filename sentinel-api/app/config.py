@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     MQTT_ROBOT_CMD_TOPIC: str = "detection_robot/command"
     MQTT_ROBOT_STATUS_TOPIC: str = "detection_robot/action_status"
 
+    # Streaming Video
+    YOLO_STREAM_URL: str = "http://172.16.137.6:8080/stream.mjpg?key=sentinel-x-secret-key-2026"
+    ROBOT_STREAM_URL: str = "http://10.0.3.234:8000/stream.mjpg?key=sentinel-x-secret-key-2026"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

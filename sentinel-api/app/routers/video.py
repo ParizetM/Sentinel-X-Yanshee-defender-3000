@@ -23,21 +23,38 @@ ROBOT_STREAM_URL = "http://10.0.3.234:8000/stream.mjpg?key=sentinel-x-secret-key
     include_in_schema=False
 )
 async def camera_stream():
-    """Relaye le flux multipart/x-mixed-replace depuis le robot ou la VM IA."""
+    """Relaye le flux multipart/x-mixed-replace depuis la VM IA YOLO (ou repli robot)."""
     async def proxy_mjpeg():
-        try:
-            timeout = httpx.Timeout(5.0, connect=1.0)
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                async with client.stream("GET", ROBOT_STREAM_URL) as response:
-                    async for chunk in response.aiter_bytes():
-                        yield chunk
-        except Exception:
-            # Fallback JPEG frame si le robot est éteint / hors-ligne
-            yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n\r\n"
+        target_urls = [
+            settings.YOLO_STREAM_URL,
+            settings.ROBOT_STREAM_URL
+        ]
+        timeout = httpx.Timeout(connect=2.0, read=None, write=5.0, pool=5.0)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            connected = False
+            for url in target_urls:
+                try:
+                    async with client.stream("GET", url) as response:
+                        if response.status_code == 200:
+                            connected = True
+                            async for chunk in response.aiter_bytes():
+                                yield chunk
+                            break
+                except Exception:
+                    continue
+
+            if not connected:
+                # Fallback JPEG frame si le flux est indisponible
+                yield b"--FRAME\r\nContent-Type: image/jpeg\r\n\r\n\r\n"
 
     return StreamingResponse(
         proxy_mjpeg(),
-        media_type="multipart/x-mixed-replace; boundary=frame"
+        media_type="multipart/x-mixed-replace; boundary=FRAME",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "X-Accel-Buffering": "no"
+        }
     )
 
 
