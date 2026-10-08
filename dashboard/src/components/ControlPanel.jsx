@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://172.16.137.5:8080';
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 function ControlPanel() {
   const [loading, setLoading] = useState(false);

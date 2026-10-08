@@ -6,9 +6,9 @@ import IABlock from './components/ia/IABlock';
 import SensorsBlock from './components/sensors/SensorsBlock';
 import ControlPanel from './components/ControlPanel';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://172.16.137.5:8080';
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://172.16.137.5:8080/ws';
-const CAMERA_URL = import.meta.env.VITE_CAMERA_URL || 'http://172.16.137.6:8080/stream.mjpg?key=sentinel-x-secret-key-2026';
+const API_URL = import.meta.env.VITE_API_URL ?? '';
+const WS_URL = import.meta.env.VITE_WS_URL || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws` : 'ws://172.16.137.5:8080/ws');
+const CAMERA_URL = import.meta.env.VITE_CAMERA_URL || '/api/v1/camera/stream';
 
 function App() {
   const [data, setData] = useState({
