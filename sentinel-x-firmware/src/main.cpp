@@ -42,7 +42,7 @@ const unsigned long GAS_INTERVAL        = 1000;
 const unsigned long OLED_INTERVAL       = 500;
 const unsigned long PIR_WARMUP          = 30000;
 const unsigned long GAS_WARMUP          = 60000;  // le MQ-135 doit chauffer, plus c'est long, plus c'est stable
-const unsigned long ALERT_BLINK         = 1000;   // mode alerte : 1 s allumé, 1 s éteint
+const unsigned long ALERT_BLINK         = 500;    // mode alerte : 0,5 s allumé, 0,5 s éteint
 
 // --- Seuils gaz (écart par rapport à l'air calme mesuré après le chauffage) ---
 const int GAS_THRESHOLD_HIGH  = 150;
@@ -70,7 +70,7 @@ bool lastPresence = false;
 // "on" active le mode alerte : le firmware fait clignoter lui-même buzzer et LED, en phase.
 bool buzzerOn = false;
 bool ledOn = false;
-bool alertPhase = false;      // true pendant la seconde "allumée" du cycle
+bool alertPhase = false;      // true pendant la phase "allumée" du cycle
 unsigned long lastAlertToggle = 0;
 unsigned long buzzerUntil = 0, ledUntil = 0;  // fin d'alerte programmée (duration_ms), 0 = jusqu'au "off"
 
@@ -167,7 +167,7 @@ void writeActuators() {
   digitalWrite(LED_PIN, ledOn && alertPhase);
 }
 
-// Cycle d'alerte sans delay() : bascule toutes les secondes tant qu'un actionneur est actif.
+// Cycle d'alerte sans delay() : bascule toutes les ALERT_BLINK ms tant qu'un actionneur est actif.
 void updateAlert(unsigned long now) {
   if (buzzerOn && buzzerUntil && (long)(now - buzzerUntil) >= 0) { buzzerOn = false; buzzerUntil = 0; }
   if (ledOn && ledUntil && (long)(now - ledUntil) >= 0)          { ledOn = false; ledUntil = 0; }
@@ -227,7 +227,7 @@ void onCommand(char* topic, byte* payload, unsigned int length) {
     if (doc["led"].is<const char*>())    setActuator(ledOn, ledUntil, doc["led"], durationMs);
   }
 
-  // Démarrage de l'alerte : on commence tout de suite par une seconde allumée.
+  // Démarrage de l'alerte : on commence tout de suite par une phase allumée.
   if (!wasActive && (buzzerOn || ledOn)) {
     alertPhase = true;
     lastAlertToggle = millis();
