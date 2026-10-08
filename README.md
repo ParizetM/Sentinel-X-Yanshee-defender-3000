@@ -264,7 +264,7 @@ C'est le risque n°1 du projet : sans contrat partagé dès lundi, l'intégratio
 
 **IA (script Python)**
 - *Vision* : capture webcam, redimensionnement (ex. 640×480), inférence YOLOv8-tiny ou OpenCV, **< 100 ms par trame**, alerte vers l'API en cas de personne détectée
-- *Maintenance prédictive* : modèle Isolation Forest ou Random Forest. **Les simples `if temp > 40` sont interdits.** Scénario de démo : hausse lente de température + micro-dérive de gaz détectée avant le seuil critique
+- *Maintenance prédictive* : modèle Isolation Forest ou Random Forest. **Les simples `if temp > 40` sont interdits.** Scénario de démo : hausse lente de température + micro-dérive de gaz détectée avant le seuil critique → implémenté dans [prediction_ia/](prediction_ia/README.md) (Isolation Forest + Random Forest par capteur, service temps réel, rapport d'évaluation)
 - Documentation : modèle, données, métriques (pour le dossier)
 
 **Fablab**

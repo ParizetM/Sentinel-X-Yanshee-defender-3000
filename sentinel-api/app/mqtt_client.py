@@ -82,6 +82,8 @@ class SentinelMQTTClient:
             client.subscribe("sentinelx/+/status")
             client.subscribe("sentinel/+/status")
             client.subscribe("sentinel/+/event")
+            # Risque calculé chaque seconde par l'IA prédictive (prediction_ia/anomaly_service.py)
+            client.subscribe("sentinelx/+/anomaly")
             # Souscriptions IA / Robot Yanshee (yanshi_video.py)
             client.subscribe("detection_robot/person_count")
             client.subscribe("detection_robot/photo")
@@ -122,6 +124,11 @@ class SentinelMQTTClient:
             # 2. Télémétrie capteurs ESP8266 : sentinelx/esp-01/telemetry
             if topic.endswith("/telemetry"):
                 await self._handle_telemetry(payload_str)
+
+            # 2b. Risque IA prédictive : sentinelx/esp-01/anomaly (relais temps réel, pas de stockage :
+            #     les alertes elles-mêmes arrivent par POST /api/v1/alerts)
+            elif topic.endswith("/anomaly"):
+                await self._handle_anomaly(topic, payload_str)
 
             # 3. Statut de vie boîtier : sentinelx/esp-01/status
             elif topic.endswith("/status"):
@@ -193,6 +200,17 @@ class SentinelMQTTClient:
         await ws_manager.broadcast({
             "type": "alert",
             "data": alert_dict
+        })
+
+    async def _handle_anomaly(self, topic: str, payload_str: str):
+        """Diffuse au dashboard l'indice de risque de l'IA prédictive (jauge / courbe)."""
+        data = json.loads(payload_str)
+        parts = topic.split("/")
+        device_id = data.get("device") or (parts[1] if len(parts) > 1 else "esp-01")
+        device_status_cache.setdefault(device_id, {})["anomaly"] = data
+        await ws_manager.broadcast({
+            "type": "anomaly",
+            "data": data
         })
 
     async def _handle_telemetry(self, payload_str: str):
