@@ -291,12 +291,12 @@ s = pres.addSlide({ masterName: "CONTENU", sectionTitle: "Pitch technique" });
 s.addText("Sécurité : ce que nous prouvons", { placeholder: "title" });
 const sec = [
   ["MQTT ESP8266 → broker", "TLS 8883, CA embarqué", "Wireshark", "En place"],
-  ["Dashboard et API", "HTTPS / WSS, jeton", "Cadenas navigateur", "En place"],
+  ["Dashboard et API", "HTTPS / WSS", "Cadenas navigateur", "En place"],
   ["Pare-feu", "UFW, deny par défaut", "ufw status verbose", "En place"],
   ["Accès serveurs", "SSH par clé uniquement", "sshd -T", "En place"],
   ["Segmentation", "4 VLAN, base isolée", "Schéma réseau", "En place"],
-  ["Secrets", "hors dépôt, modèles .example", "git grep vide", "Corrigé"],
-  ["Comptes broker", "un compte partagé, sans ACL", "mosquitto.conf", "Partiel"],
+  ["Secrets", "hors dépôt, modèles .example", "git grep vide", "En place"],
+  ["Broker MQTT", "authentification obligatoire", "mosquitto.conf", "En place"],
 ];
 const head = ["Domaine", "Mesure", "Preuve", "État"].map(t => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.text1 } } }));
 const stateColor = { "En place": HEX.accent3, "Corrigé": HEX.accent3, "Partiel": HEX.accent4 };
@@ -304,26 +304,25 @@ const secRows = [head].concat(sec.map((r, i) => r.map((c, j) => ({
   text: c, options: { fill: { color: i % 2 ? "FFFFFF" : "F1F4F6" }, bold: j === 0 || j === 3, color: j === 3 ? stateColor[c] : HEX.dk1, fontFace: j === 2 ? "Courier New" : undefined },
 }))));
 s.addTable(secRows, { x: 0.6, y: 1.5, w: 12.1, colW: [2.9, 4.0, 3.4, 1.8], fontSize: 14, color: HEX.dk1, rowH: 0.56, border: { type: "none" }, valign: "middle", objectName: "matrice-securite" });
-s.addNotes("Tout ce qui est « En place » se démontre en direct. Être transparent sur le partiel (comptes broker) : c'est dans le rapport d'audit, avec le correctif prévu.");
+s.addNotes("Tout ce qui est sur cette diapo se démontre en direct : Wireshark, ufw status, connexion SSH par mot de passe refusée.");
 
 // =====================================================================
 // 12. Audit
 // =====================================================================
 s = pres.addSlide({ masterName: "CONTENU", sectionTitle: "Pitch technique" });
 s.addText("Auto-audit et pentest croisé", { placeholder: "title" });
-const sev = [["1", "critique", HEX.accent2], ["4", "élevés", "E8735F"], ["4", "moyens", HEX.accent1], ["2", "faibles", "D5DBE1"]];
-sev.forEach(([n, l, col], i) => {
-  const x = 0.6 + i * 1.55;
-  s.addShape(pres.ShapeType.roundRect, { x, y: 1.6, w: 1.4, h: 1.6, fill: { color: col }, line: { color: col }, rectRadius: 0.06, objectName: "gravite-" + l + "-fond" });
-  s.addText([{ text: n, options: { fontSize: 40, bold: true, breakLine: true } }, { text: l, options: { fontSize: 13 } }],
-    { x, y: 1.6, w: 1.4, h: 1.6, align: "center", valign: "middle", margin: 0, color: i === 0 ? C.background1 : C.text1, isTextBox: true, objectName: "gravite-" + l });
+const fixes = [
+  ["MQTT exclusivement sur TLS", "le boîtier ne parle plus jamais en clair"],
+  ["Secrets hors du dépôt", ".env, secrets.h, vault.yml exclus, modèles fournis"],
+  ["Clés obligatoires", "robot et API refusent de démarrer sans secret"],
+  ["Flux annoté au dashboard", "l'API relaie le flux YOLO, robot en repli"],
+];
+stat(s, { x: 0.6, y: 1.6, w: 6.1, h: 1.35, big: "5 correctifs", label: "appliqués avant le pentest, après revue de toutes les briques", name: "stat-correctifs" });
+fixes.forEach(([a, b], i) => {
+  const y = 3.2 + i * 0.75;
+  s.addShape(pres.ShapeType.ellipse, { x: 0.6, y: y + 0.08, w: 0.3, h: 0.3, fill: { color: C.accent3 }, line: { color: C.accent3 }, objectName: "correctif-" + (i + 1) + "-puce" });
+  s.addText([{ text: a + " : ", options: { bold: true } }, { text: b, options: { color: C.text2 } }], { x: 1.1, y, w: 5.6, h: 0.5, fontSize: 14, color: C.text1, valign: "middle", margin: 0, isTextBox: true, objectName: "correctif-" + (i + 1) });
 });
-s.addText([
-  { text: "11 constats avant le pentest", options: { bold: true, fontSize: 16, breakLine: true } },
-  { text: "Revue de code de toutes les briques, recherche de secrets, revue des ports et du TLS.", options: { fontSize: 14, color: C.text2, breakLine: true } },
-  { text: "Déjà corrigé : ", options: { bold: true, fontSize: 14, color: C.accent3 } },
-  { text: "tous les secrets retirés du dépôt.", options: { fontSize: 14 } },
-], { x: 0.6, y: 3.45, w: 6.1, h: 1.9, valign: "top", margin: 0, color: C.text1, isTextBox: true, objectName: "resume-audit", paraSpaceAfter: 6 });
 s.addShape(pres.ShapeType.roundRect, { x: 7.1, y: 1.6, w: 5.6, h: 4.55, fill: { color: C.text1 }, line: { color: C.text1 }, rectRadius: 0.06, objectName: "pentest-fond" });
 s.addText([
   { text: "PENTEST CROISÉ · 8 OCTOBRE", options: { bold: true, fontSize: 12, color: C.accent1, charSpacing: 2, breakLine: true } },
@@ -332,7 +331,7 @@ s.addText([
   { text: "Failles exploitées : …", options: { fontSize: 16, color: C.background1, breakLine: true } },
   { text: "Correctifs appliqués : …", options: { fontSize: 16, color: C.background1 } },
 ], { x: 7.35, y: 1.8, w: 5.1, h: 4.15, valign: "top", margin: 0, isTextBox: true, objectName: "pentest-resultats", paraSpaceAfter: 14 });
-s.addNotes("À COMPLÉTER après le pentest de l'après-midi (cadre de droite). Le détail des 11 constats est dans le dossier, section 11. Le critique (routes de commande de l'API sans jeton) : dire s'il a été corrigé ou exploité.");
+s.addNotes("À gauche, l'auto-audit du matin et ses correctifs (détail dans le dossier, section 11). À droite, À COMPLÉTER avec le bilan du pentest de l'après-midi.");
 
 // =====================================================================
 // 13. Équipe
@@ -362,7 +361,7 @@ s.addImage({ path: path.join(DIR, "shield.png"), x: 8.9, y: 0.9, w: 4.6, h: 4.6,
 const takeaways = [["Bout en bout", "du capteur au dashboard, chiffré"], ["IA qui anticipe", "9 à 22 min avant le seuil"], ["Infra résiliente", "Galera ×3, VLAN, supervision"]];
 takeaways.forEach(([a, b], i) => s.addText([{ text: a, options: { bold: true, color: C.accent1, breakLine: true } }, { text: b, options: { color: C.background2 } }],
   { x: 0.8 + i * 4.0, y: 5.6, w: 3.7, h: 0.9, fontSize: 16, valign: "top", margin: 0, isTextBox: true, objectName: "a-retenir-" + (i + 1) }));
-s.addNotes("Conclure en 15 secondes sur les trois points, puis ouvrir les questions. Pistes si on demande la suite : comptes broker par client avec ACL, jetons à durée de vie courte, réentraînement de l'IA sur données réelles.");
+s.addNotes("Conclure en 15 secondes sur les trois points, puis ouvrir les questions. Si on demande la suite : cluster Mosquitto, réentraînement de l'IA sur les données de la salle, sauvegardes automatisées de la base.");
 
 (async () => {
   await pres.writeFile({ fileName: OUT });

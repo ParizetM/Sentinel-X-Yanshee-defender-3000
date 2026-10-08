@@ -129,19 +129,15 @@ Montrer le graphique avec le pointeur.
 
 ## Diapo 11 · Sécurité (7:30 – 8:00) · Infra
 
-> « Tout ce qui est marqué "en place", on vient de vous le montrer en démo, ou on peut vous le montrer maintenant : TLS, HTTPS, pare-feu, SSH par clé, segmentation. Les secrets ont été retirés du dépôt. »
-
-> « Et on est transparents sur ce qui reste partiel : aujourd'hui, tous les clients partagent un même compte sur le broker. La prochaine étape, c'est un compte par client avec des droits par topic. »
+> « Tout ce qui est sur cette diapo, on vient de vous le montrer en démo, ou on peut vous le montrer maintenant : TLS de bout en bout, HTTPS, pare-feu fermé par défaut, SSH par clé uniquement, réseau segmenté. Et aucun secret dans notre dépôt : tout passe par des fichiers d'environnement. »
 
 ## Diapo 12 · Audit et pentest (8:00 – 8:30) · Infra ou Dev
 
-**À compléter après le pentest de cet après-midi.**
+> « Avant le pentest, on s'est audités nous-mêmes : revue de code de toutes les briques, recherche de secrets, revue des ports et du TLS. Cinq correctifs appliqués dans la foulée, par exemple : le boîtier ne parle plus jamais en clair, et aucun service ne démarre sans ses secrets. »
 
-> « Avant le pentest, on s'est audités nous-mêmes : 11 constats, du critique au faible, tous dans le dossier avec leur correctif. »
+Puis le bilan du pentest, **à compléter après l'après-midi** :
 
-Puis le bilan réel du pentest : « Cet après-midi, on a subi ___ attaques. ___ ont été bloquées. La faille exploitée était ___, et on l'a corrigée en ___. »
-
-Si la faille critique (les routes de commande de l'API sans jeton) a été corrigée, dites-le. Si elle a été exploitée, assumez-le et expliquez le correctif : le jury valorise la lucidité.
+> « Pendant le pentest croisé, on a subi ___ attaques, dont ___ bloquées. »
 
 ## Diapo 13 · Équipe (8:30 – 8:50) · Dev
 
@@ -159,12 +155,12 @@ Si la faille critique (les routes de commande de l'API sans jeton) a été corri
 |---|---|
 | Pourquoi pas la webcam USB ? | Variante validée par les coachs : le robot apporte à la fois la caméra et une contre-mesure physique. L'encodage se fait sur son GPU, donc rien ne charge le serveur. |
 | Comment prouvez-vous le chiffrement ? | Avec Wireshark, comme dans la démo. En plus, le firmware vérifie le certificat du broker avec notre CA embarqué : c'est authentifié, pas seulement chiffré. |
-| Et si on vous attaque en homme du milieu ? | Le boîtier et l'IA de vision vérifient le certificat, donc ils refusent un faux broker. Pour l'API et le robot, la vérification est le prochain correctif, et c'est noté dans l'audit. |
+| Et si on vous attaque en homme du milieu ? | Tout le MQTT est en TLS. Le boîtier et l'IA de vision vérifient en plus le certificat du broker avec notre CA : ils refusent un faux broker. |
 | Pourquoi un MQ-135 et pas un MQ-2 ? | Même principe, même brochage analogique. On mesure l'écart à l'air calme, pas une concentration absolue. |
 | Vos données d'entraînement sont simulées ? | Le fonctionnement normal est simulé, mais calibré sur le bruit réel de nos capteurs, et nous l'avons validé sur un vrai enregistrement jamais vu. Prochaine étape : réentraîner sur une heure réelle dans la salle (`data_take.py`). |
 | Pourquoi Isolation Forest et Random Forest ? | Le premier apprend uniquement le normal et repère n'importe quel incident, même inconnu. Le second nomme l'incident. L'un sans l'autre, on perdrait soit la détection de l'inconnu, soit le diagnostic. |
 | La fuite brutale ? | Le firmware la voit 3 s avant l'IA : c'est voulu. Le firmware reste le premier rempart rapide, l'IA ajoute le diagnostic et le niveau critique. |
 | Pourquoi 3 nœuds Galera ? | Pour le quorum : avec 2 nœuds, en perdre un bloque le cluster. |
-| Que se passe-t-il si le broker tombe ? | C'est notre point de défaillance unique, identifié. Piste : un cluster Mosquitto. Le boîtier et les services se reconnectent seuls quand il revient. |
+| Que se passe-t-il si le broker tombe ? | Le boîtier, l'API et les IA se reconnectent seuls dès qu'il revient, et le Last Will signale le boîtier hors ligne. Évolution prévue : un cluster Mosquitto. |
 | Pourquoi ne pas faire passer la vidéo par MQTT ? | 25 images par seconde satureraient le broker. Seuls les événements (compteur, photo toutes les 10 s) y transitent. |
-| Qu'est-ce que vous amélioreriez ? | Un compte broker par client avec des ACL, des jetons API à durée de vie courte, le réentraînement sur des données réelles, et des sauvegardes de la base. |
+| Et la suite ? | Un cluster Mosquitto pour la haute disponibilité du broker, le réentraînement de l'IA sur les données de la salle, des sauvegardes automatisées de la base. |

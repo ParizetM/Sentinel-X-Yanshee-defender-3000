@@ -48,8 +48,8 @@ Prototype cyber-physique de surveillance pour les micro-centrales d'AetherCorp. 
 | 1 | ESP8266 → Mosquitto (mesures, statut) | MQTT/TLS 8883 | CA embarqué dans le firmware, chaîne vérifiée, authentification |
 | 2 | Mosquitto → API (ingestion) | MQTT/TLS 8883 | Authentification broker |
 | 3 | API → Galera (stockage) | SQL 3306 via VIP HAProxy | Utilisateur applicatif dédié |
-| 4 | Dashboard ↔ API | HTTPS + WSS (reverse proxy) | Jeton API |
-| 5 | Dashboard → API → Mosquitto → ESP8266 (buzzer, LED) | HTTPS puis MQTTS | Jeton API + journal d'audit |
+| 4 | Dashboard ↔ API | HTTPS + WSS (reverse proxy) | TLS |
+| 5 | Dashboard → API → Mosquitto → ESP8266 (buzzer, LED) | HTTPS puis MQTTS | Journal d'audit de chaque commande |
 | 6 | IA prédictive → API (alertes) | HTTPS `POST /api/v1/alerts` | Jeton API |
 | 7 | Robot → IA vision (vidéo) | MJPEG HTTP 8000 | Clé API (`X-API-KEY`) |
 | 8 | IA vision → Mosquitto → robot (riposte) | MQTT/TLS 8883 | CA vérifié, authentification broker |

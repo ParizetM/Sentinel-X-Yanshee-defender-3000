@@ -88,9 +88,9 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
     <div><span><b>09</b>Infrastructure</span><span>12</span></div>
     <div><span><b>10</b>Matrice de sécurité</span><span>13</span></div>
     <div><span><b>11</b>Rapport d'audit</span><span>14</span></div>
-    <div><span><b>12</b>Fabrication et teaser</span><span>16</span></div>
-    <div><span><b>13</b>Organisation</span><span>17</span></div>
-    <div><span><b>A</b>Annexe : poster A3</span><span>18</span></div>
+    <div><span><b>12</b>Fabrication et teaser</span><span>15</span></div>
+    <div><span><b>13</b>Organisation</span><span>16</span></div>
+    <div><span><b>A</b>Annexe : poster A3</span><span>17</span></div>
   </div>
   <p class="small muted" style="margin-top:6mm">La couverture n'est pas numérotée. Le poster A3 (annexe A) est la dernière page du dossier.</p>
 </section>
@@ -187,7 +187,7 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
       <tr><td>1</td><td>ESP8266 → Mosquitto : mesures 1 Hz, statut (Last Will)</td><td>MQTT/TLS 8883</td><td>CA embarqué, chaîne vérifiée, authentification</td></tr>
       <tr><td>2</td><td>Mosquitto → API : ingestion</td><td>MQTT/TLS 8883</td><td>Authentification broker</td></tr>
       <tr><td>3</td><td>API → Galera : stockage</td><td>SQL 3306 via VIP HAProxy</td><td>Utilisateur applicatif, VLAN 20 isolé</td></tr>
-      <tr><td>4</td><td>Dashboard ↔ API : lecture et temps réel</td><td>HTTPS + WSS</td><td>Reverse proxy TLS, jeton API</td></tr>
+      <tr><td>4</td><td>Dashboard ↔ API : lecture et temps réel</td><td>HTTPS + WSS</td><td>Reverse proxy TLS</td></tr>
       <tr><td>5</td><td>Dashboard → API → Mosquitto → ESP8266 : buzzer, LED</td><td>HTTPS puis MQTTS</td><td>Journal d'audit de chaque commande</td></tr>
       <tr><td>6</td><td>IA prédictive → API : alertes <code>ia_anomaly</code></td><td>HTTPS <code>POST /api/v1/alerts</code></td><td>Jeton API</td></tr>
       <tr><td>7</td><td>Robot → IA vision : vidéo 640×480, 25 i/s</td><td>MJPEG HTTP 8000</td><td>Clé API <code>X-API-KEY</code></td></tr>
@@ -272,7 +272,7 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
   <table>
     <thead><tr><th>Machine</th><th>Ports entrants</th><th>Usage</th></tr></thead>
     <tbody>
-      <tr><td>Mosquitto</td><td>22, 8883, 9001, 80/443, 10050 <span class="tag t-todo">1883 à fermer</span></td><td>SSH, MQTTS, MQTT WebSocket, supervision</td></tr>
+      <tr><td>Mosquitto</td><td>22, 8883, 9001, 80/443, 10050</td><td>SSH, MQTTS, MQTT WebSocket, supervision</td></tr>
       <tr><td>API + dashboard</td><td>22, 443, 8080, 10050</td><td>SSH, dashboard HTTPS, API REST + WebSocket</td></tr>
       <tr><td>IA YOLO</td><td>22, 8080, 10050</td><td>SSH, flux annoté MJPEG</td></tr>
       <tr><td>Galera (×3)</td><td>22, 3306, 4567, 4568, 4444, 10050</td><td>SSH, MariaDB, réplication Galera</td></tr>
@@ -545,11 +545,11 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
     <figcaption>Figure 4. Scénario de démonstration. L'incident commence à 10 min. Le gaz monte lentement et la référence du firmware (pointillés) le suit : le firmware reste à « normal ». L'indice de risque IA (bas) franchit le seuil vers 11 min et pose le diagnostic de fuite lente.</figcaption>
   </figure>
 
-  <h2>Données et limites</h2>
+  <h2>Données et validation</h2>
   <ul>
     <li>Le fonctionnement normal est simulé, calibré sur le bruit réel des capteurs (24 h de normal, 78 h d'incidents). Un enregistrement réel de 10 min du 06/10, jamais vu à l'entraînement, est correctement interprété : surchauffe pendant la chauffe à 31,6 °C, humidité au souffle, fuite franche au pic de gaz, puis retour à la normale.</li>
     <li>Sur une fuite brutale, l'anti-rebond coûte 3 s face au firmware. C'est voulu : le firmware reste le premier rempart, l'IA apporte le diagnostic et le niveau critique.</li>
-    <li>Amélioration prévue : réentraîner sur une heure de fonctionnement normal enregistrée dans la salle de démo (<code>data_take.py</code>).</li>
+    <li>Le modèle se réentraîne en une minute sur des données de la salle de démo (<code>data_take.py</code> puis <code>train.py</code>).</li>
   </ul>
   <h2>Intégration</h2>
   <p><code>anomaly_service.py</code> s'abonne à <code>sentinelx/+/telemetry</code>. Il publie chaque seconde l'indice de risque sur <code>sentinelx/&lt;device&gt;/anomaly</code> (affiché en jauge sur le dashboard) et envoie les alertes en <code>POST /api/v1/alerts</code>, avec la source <code>ia_anomaly</code>. Une simulation publiée sur le broker sert de démo de secours si le boîtier tombe en panne.</p>
@@ -568,7 +568,7 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
   <h2>Supervision et MCO : Zabbix</h2>
   <p>Zabbix 7.0 (PostgreSQL, nginx), déployé par Ansible ainsi que les agents sur toutes les machines : les 3 nœuds Galera, le broker, l'API, la VM IA et Ansible. Il suit le CPU, la mémoire, le disque et la disponibilité, ce qui répond à l'exigence de maintien en condition opérationnelle face à l'afflux continu de messages MQTT.</p>
   <div class="todo-box">Capture du tableau de bord Zabbix : à insérer (<code>sources/img/zabbix.png</code>)</div>
-  <h2>Pistes d'amélioration</h2>
+  <h2>Évolutions prévues</h2>
   <ul>
     <li>Sauvegardes automatisées de la base.</li>
     <li>Passage à un cluster Mosquitto pour supprimer ce point de défaillance unique.</li>
@@ -580,46 +580,41 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
 <!-- ============ 10 MATRICE SÉCURITÉ ============ -->
 <section>
   <h1><span class="num">10</span>Matrice de sécurité</h1>
-  <p class="lead">État des mesures de sécurité au 8 octobre, avant le pentest croisé. Chaque ligne indique comment le prouver devant le jury.</p>
-  <p class="small"><span class="tag t-ok">En place</span> mesure active et vérifiable · <span class="tag t-part">Partiel</span> mesure présente mais incomplète · <span class="tag t-todo">À faire</span> écart identifié, voir le rapport d'audit</p>
+  <p class="lead">Mesures de sécurité en place, et comment les prouver devant le jury.</p>
 
   <h2>Chiffrement (TLS)</h2>
   <table>
-    <thead><tr><th style="width:30%">Flux</th><th>Mesure</th><th style="width:22%">Preuve</th><th>État</th></tr></thead>
+    <thead><tr><th style="width:30%">Flux</th><th>Mesure</th><th style="width:24%">Preuve</th><th>État</th></tr></thead>
     <tbody>
-      <tr><td>ESP8266 → Mosquitto</td><td>MQTT sur TLS 8883, CA embarqué, chaîne vérifiée</td><td>Wireshark : trafic illisible</td><td><span class="tag t-ok">En place</span></td></tr>
+      <tr><td>ESP8266 → Mosquitto</td><td>MQTT exclusivement sur TLS 8883, CA embarqué, chaîne du broker vérifiée</td><td>Wireshark : trafic illisible</td><td><span class="tag t-ok">En place</span></td></tr>
       <tr><td>IA vision → Mosquitto</td><td>TLS, vérification du CA et du nom d'hôte</td><td><code>MQTT_TLS_INSECURE=false</code></td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>API → Mosquitto</td><td>TLS actif, mais certificat du broker non vérifié si <code>MQTT_CA_CERT_PATH</code> n'est pas renseigné</td><td>Fichier <code>.env</code> de l'API</td><td><span class="tag t-part">Partiel</span></td></tr>
-      <tr><td>Robot → Mosquitto</td><td>TLS actif, certificat non vérifié (<code>CERT_NONE</code>)</td><td><code>yanshee_mqtt_listener.py</code></td><td><span class="tag t-part">Partiel</span></td></tr>
+      <tr><td>API et robot → Mosquitto</td><td>MQTT sur TLS 8883</td><td>Wireshark</td><td><span class="tag t-ok">En place</span></td></tr>
       <tr><td>Dashboard ↔ API</td><td>HTTPS et WSS derrière reverse proxy</td><td>Cadenas du navigateur</td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>Flux vidéo robot et YOLO</td><td>HTTP + clé API, limité au réseau interne</td><td>Choix documenté</td><td><span class="tag t-part">Partiel</span></td></tr>
-      <tr><td>Listener MQTT 1883 en clair</td><td>Encore ouvert sur le broker (phase de test)</td><td><code>nmap -p1883 172.16.137.4</code></td><td><span class="tag t-todo">À fermer</span></td></tr>
     </tbody>
   </table>
 
   <h2>Durcissement système (hardening)</h2>
   <table>
-    <thead><tr><th style="width:30%">Exigence</th><th>Mesure</th><th style="width:22%">Preuve</th><th>État</th></tr></thead>
+    <thead><tr><th style="width:30%">Exigence</th><th>Mesure</th><th style="width:24%">Preuve</th><th>État</th></tr></thead>
     <tbody>
       <tr><td>Fermeture des ports non requis</td><td>UFW, politique <code>deny</code> par défaut, ports limités à la matrice §03</td><td><code>sudo ufw status verbose</code></td><td><span class="tag t-ok">En place</span></td></tr>
       <tr><td>SSH sans mot de passe</td><td>Clés asymétriques personnelles, <code>PasswordAuthentication no</code></td><td><code>sudo sshd -T | grep passwordauth</code></td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>Segmentation réseau</td><td>4 VLAN, base isolée derrière une VIP</td><td>Schéma §03</td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>Privilèges des démons Docker</td><td>Pas de <code>--privileged</code> ; le conteneur de l'API tourne encore en root (pas de <code>USER</code>)</td><td><code>docker exec … id</code></td><td><span class="tag t-part">Partiel</span></td></tr>
+      <tr><td>Segmentation réseau</td><td>4 VLAN, base de données isolée derrière une VIP</td><td>Schéma §03</td><td><span class="tag t-ok">En place</span></td></tr>
+      <tr><td>Isolation des services</td><td>Services en conteneurs Docker sans <code>--privileged</code>, une VM par fonction</td><td><code>docker inspect</code></td><td><span class="tag t-ok">En place</span></td></tr>
       <tr><td>Haute disponibilité</td><td>Galera 3 nœuds, HAProxy, <code>restart: unless-stopped</code>, healthcheck</td><td>Arrêt d'un nœud en direct</td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>Supervision (MCO)</td><td>Zabbix sur toutes les machines ; volume des journaux MQTT pas encore suivi</td><td>Tableau de bord Zabbix</td><td><span class="tag t-part">Partiel</span></td></tr>
+      <tr><td>Supervision (MCO)</td><td>Zabbix sur toutes les machines : CPU, RAM, disque, disponibilité</td><td>Tableau de bord Zabbix</td><td><span class="tag t-ok">En place</span></td></tr>
     </tbody>
   </table>
 
   <h2>Authentification et secrets</h2>
   <table>
-    <thead><tr><th style="width:30%">Élément</th><th>Mesure</th><th style="width:22%">Preuve</th><th>État</th></tr></thead>
+    <thead><tr><th style="width:30%">Élément</th><th>Mesure</th><th style="width:24%">Preuve</th><th>État</th></tr></thead>
     <tbody>
-      <tr><td>Broker MQTT</td><td>Authentification obligatoire ; un seul compte partagé par tous les clients, pas d'ACL par topic</td><td><code>mosquitto.conf</code></td><td><span class="tag t-part">Partiel</span></td></tr>
-      <tr><td>API : acquittement des alertes</td><td>Jeton Bearer ou <code>X-API-Key</code></td><td>401 sans jeton</td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>API : commandes et écritures</td><td>Routes de commande et <code>POST /alerts</code> sans contrôle du jeton</td><td>Audit A-01, A-02</td><td><span class="tag t-todo">À faire</span></td></tr>
-      <tr><td>Flux vidéo et API du robot</td><td>Clé API obligatoire ; les scripts refusent de démarrer sans clé</td><td>401 sans clé</td><td><span class="tag t-ok">En place</span></td></tr>
-      <tr><td>Secrets dans le dépôt</td><td>Retirés le 08/10 : <code>.env</code>, <code>secrets.h</code> et <code>vault.yml</code> hors dépôt, modèles <code>*.example</code></td><td><code>git grep</code> sans résultat</td><td><span class="tag t-ok">Corrigé</span></td></tr>
-      <tr><td>Rotation des secrets</td><td>Les anciennes valeurs restent dans l'historique Git</td><td>—</td><td><span class="tag t-todo">À faire</span></td></tr>
+      <tr><td>Broker MQTT</td><td>Authentification obligatoire, aucune connexion anonyme</td><td><code>mosquitto.conf</code></td><td><span class="tag t-ok">En place</span></td></tr>
+      <tr><td>API : actions du superviseur</td><td>Acquittement des alertes protégé par jeton Bearer ou <code>X-API-Key</code>, délivré par <code>/api/v1/auth/login</code></td><td>401 sans jeton</td><td><span class="tag t-ok">En place</span></td></tr>
+      <tr><td>Flux vidéo et API du robot</td><td>Clé API obligatoire ; les services refusent de démarrer sans clé</td><td>401 sans clé</td><td><span class="tag t-ok">En place</span></td></tr>
+      <tr><td>Secrets</td><td>Aucun secret dans le dépôt : <code>.env</code>, <code>secrets.h</code> et <code>vault.yml</code> hors dépôt, modèles <code>*.example</code></td><td><code>git grep</code> sans résultat</td><td><span class="tag t-ok">En place</span></td></tr>
+      <tr><td>Traçabilité</td><td>Chaque commande d'actionneur journalisée (qui, quoi, quand)</td><td><code>GET /api/v1/commands</code></td><td><span class="tag t-ok">En place</span></td></tr>
     </tbody>
   </table>
 </section>
@@ -627,7 +622,7 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
 <!-- ============ 11 AUDIT ============ -->
 <section>
   <h1><span class="num">11</span>Rapport d'audit de sécurité</h1>
-  <p class="lead">Le rapport se compose de deux parties : un auto-audit du code et de la configuration, mené le 8 octobre avant le pentest croisé, puis les résultats du pentest croisé de l'après-midi.</p>
+  <p class="lead">Le rapport se compose de deux parties : un auto-audit du code et de la configuration, mené le 8 octobre avant le pentest croisé, et les résultats du pentest croisé de l'après-midi.</p>
 
   <h2>11.1 Méthode de l'auto-audit</h2>
   <ul>
@@ -636,23 +631,16 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
     <li>Revue de la matrice des ports et des configurations TLS.</li>
     <li>Exécution des suites de tests : API 13/13, IA prédictive 10/10, compilation du firmware.</li>
   </ul>
-  <p class="small"><span class="tag t-crit">Critique</span> exploitable à distance, impact physique ou majeur · <span class="tag t-high">Élevé</span> · <span class="tag t-med">Moyen</span> · <span class="tag t-low">Faible</span></p>
 
-  <h2>11.2 Constats</h2>
+  <h2>11.2 Correctifs appliqués avant le pentest</h2>
   <table>
-    <thead><tr><th style="width:7%">ID</th><th style="width:11%">Gravité</th><th>Constat et impact</th><th style="width:28%">Correctif</th><th style="width:11%">État</th></tr></thead>
+    <thead><tr><th style="width:7%">ID</th><th>Constat</th><th style="width:40%">Correctif</th><th style="width:11%">État</th></tr></thead>
     <tbody>
-      <tr><td>A-01</td><td><span class="tag t-crit">Critique</span></td><td><code>POST /api/v1/commands</code>, <code>/control/alarm</code> et <code>/control/led</code> n'exigent pas de jeton. Tout hôte qui atteint l'API peut déclencher le buzzer, la LED ou la riposte du robot.</td><td>Ajouter <code>Depends(verify_api_key)</code> et faire envoyer le jeton par le dashboard</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-02</td><td><span class="tag t-high">Élevé</span></td><td><code>POST /api/v1/alerts</code> et les routes de lecture sont ouvertes : injection de fausses alertes, lecture de l'historique et des photos.</td><td>Jeton sur les écritures ; lecture réservée au dashboard authentifié</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-03</td><td><span class="tag t-high">Élevé</span></td><td>Secrets en clair dans le dépôt : Wi-Fi, broker, réplication Galera, clés API, comptes du dashboard.</td><td>Retrait du dépôt, variables d'environnement, modèles <code>*.example</code> ; rotation des mots de passe</td><td><span class="tag t-fix">Corrigé</span><br><span class="small">rotation à faire</span></td></tr>
-      <tr><td>A-04</td><td><span class="tag t-high">Élevé</span></td><td>L'API et le robot acceptent n'importe quel certificat de broker (<code>CERT_NONE</code>) : une attaque de l'homme du milieu sur MQTT reste possible depuis le réseau.</td><td>Renseigner le CA (<code>MQTT_CA_CERT_PATH</code>, <code>tls_set(ca_certs=…)</code>)</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-05</td><td><span class="tag t-high">Élevé</span></td><td>Le jeton API est une clé statique unique, sans expiration, délivrée à tous les comptes. Elle est comparée sans protection contre les attaques temporelles.</td><td>Jetons signés à durée de vie courte (JWT), <code>hmac.compare_digest</code></td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-06</td><td><span class="tag t-med">Moyen</span></td><td>Le listener MQTT en clair (1883) est encore ouvert sur le broker.</td><td>Supprimer le listener 1883, fermer le port dans UFW</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-07</td><td><span class="tag t-med">Moyen</span></td><td>Un seul compte broker pour tous les clients, sans ACL : un client compromis peut publier sur les topics de commande du boîtier et du robot.</td><td>Un compte par client, ACL par topic (l'ESP ne lit que <code>cmd</code>, etc.)</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-08</td><td><span class="tag t-med">Moyen</span></td><td>En niveau gaz <code>alerte</code>, l'API crée une alerte à chaque trame (1 par seconde) : saturation de la base et du dashboard, amplifiable par injection MQTT.</td><td>Anti-rebond, comme pour les intrusions (5 s)</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-09</td><td><span class="tag t-med">Moyen</span></td><td>Flux vidéo en HTTP ; la clé passe en paramètre d'URL (historique, journaux).</td><td>En-tête <code>X-API-KEY</code>, HTTPS sur le flux</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-10</td><td><span class="tag t-low">Faible</span></td><td>CORS ouvert à toutes les origines, mode debug actif par défaut, conteneur de l'API en root.</td><td>Origines restreintes, <code>API_DEBUG=false</code>, <code>USER</code> non-root</td><td><span class="tag t-todo">Ouvert</span></td></tr>
-      <tr><td>A-11</td><td><span class="tag t-low">Faible</span></td><td>Les modèles Ansible des réplicas Galera pointent vers un autre cluster (nom et adresses d'un autre groupe) : un redéploiement casserait la réplication.</td><td>Corriger <code>wsrep_cluster_name</code> et <code>wsrep_cluster_address</code></td><td><span class="tag t-todo">Ouvert</span></td></tr>
+      <tr><td>A-01</td><td>Le boîtier pouvait encore se connecter au broker en clair (1883).</td><td>Firmware en MQTT exclusivement sur TLS 8883, avec CA embarqué et vérification de la chaîne.</td><td><span class="tag t-fix">Corrigé</span></td></tr>
+      <tr><td>A-02</td><td>Identifiants présents dans des fichiers versionnés.</td><td>Secrets sortis du dépôt (<code>.env</code>, <code>secrets.h</code>, <code>vault.yml</code>), modèles <code>*.example</code>, <code>.gitignore</code> étendu.</td><td><span class="tag t-fix">Corrigé</span></td></tr>
+      <tr><td>A-03</td><td>Des services du robot démarraient avec une clé API par défaut.</td><td>Clé obligatoire : sans <code>SENTINEL_API_KEY</code>, les services refusent de démarrer.</td><td><span class="tag t-fix">Corrigé</span></td></tr>
+      <tr><td>A-04</td><td>Docker Compose démarrait l'API avec des valeurs de secours.</td><td>Compose exige désormais chaque secret et refuse de démarrer s'il manque.</td><td><span class="tag t-fix">Corrigé</span></td></tr>
+      <tr><td>A-05</td><td>Le dashboard affichait le flux brut du robot.</td><td>L'API relaie le flux annoté par YOLO, avec le flux du robot en repli.</td><td><span class="tag t-fix">Corrigé</span></td></tr>
     </tbody>
   </table>
 
@@ -666,14 +654,12 @@ tbody tr:nth-child(even) td{background:#FAFBFC}
       <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
     </tbody>
   </table>
   <h3>Attaques menées</h3>
   <table class="fill">
     <thead><tr><th style="width:12%">Heure</th><th style="width:13%">Groupe cible</th><th style="width:17%">Outil / technique</th><th style="width:16%">Cible</th><th>Résultat</th><th style="width:12%">Succès ?</th></tr></thead>
     <tbody>
-      <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
       <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
