@@ -39,25 +39,46 @@ async def camera_stream():
     )
 
 
+PHOTO_CACHE_PATH = "/var/tmp/sentinel_latest_photo.jpg"
+PHOTO_TS_PATH = "/var/tmp/sentinel_latest_photo.txt"
+
+
 @router.get(
     "/api/v1/camera/latest_photo",
     summary="Dernière photo d'intrusion capturée",
     description="Retourne le dernier cliché JPEG reçu par le bus MQTT (detection_robot/photo)."
 )
 async def get_latest_photo():
-    from app.mqtt_client import latest_photo_cache, latest_photo_timestamp
-    if not latest_photo_cache:
+    import os
+    import app.mqtt_client as mqtt_mod
+
+    content = mqtt_mod.latest_photo_cache
+    ts = mqtt_mod.latest_photo_timestamp
+
+    if not content and os.path.exists(PHOTO_CACHE_PATH):
+        try:
+            with open(PHOTO_CACHE_PATH, "rb") as f:
+                content = f.read()
+                mqtt_mod.latest_photo_cache = content
+            if os.path.exists(PHOTO_TS_PATH):
+                with open(PHOTO_TS_PATH, "r") as f:
+                    ts = f.read().strip()
+                    mqtt_mod.latest_photo_timestamp = ts
+        except Exception:
+            pass
+
+    if not content:
         raise HTTPException(
             status_code=404,
             detail="Aucune photo de détection disponible pour le moment"
         )
 
     headers = {}
-    if latest_photo_timestamp:
-        headers["X-Capture-Timestamp"] = latest_photo_timestamp
+    if ts:
+        headers["X-Capture-Timestamp"] = ts
 
     return Response(
-        content=latest_photo_cache,
+        content=content,
         media_type="image/jpeg",
         headers=headers
     )

@@ -115,6 +115,13 @@ class SentinelMQTTClient:
                 if not latest_photo_timestamp:
                     latest_photo_timestamp = datetime.now(timezone.utc).isoformat()
                 logger.info(f"[MQTT] Photo JPEG reçue ({len(payload_bytes)} octets)")
+                try:
+                    with open("/var/tmp/sentinel_latest_photo.jpg", "wb") as f:
+                        f.write(payload_bytes)
+                    with open("/var/tmp/sentinel_latest_photo.txt", "w") as f:
+                        f.write(latest_photo_timestamp)
+                except Exception:
+                    pass
                 await ws_manager.broadcast({
                     "type": "photo",
                     "data": {
