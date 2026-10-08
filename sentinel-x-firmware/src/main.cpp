@@ -4,7 +4,9 @@
 #include <ArduinoJson.h>
 #include <DHT.h>
 #include <U8g2lib.h>
+#include <time.h>
 #include "secrets.h"
+#include "mqtt_ca.h"
 
 // Sentinel-X : capteurs (DHT22, MQ-135, PIR) + écran OLED + MQTT.
 // Câblage : voir le mapping matériel (OLED sur D6/D7, D3/D4/D8 libres).
@@ -30,8 +32,14 @@ char topicTelemetry[48];
 char topicStatus[48];
 char topicCmd[48];
 
-WiFiClient wifiClient;
+// MQTT uniquement en TLS (port 8883) : la chaîne du broker est vérifiée avec le CA embarqué.
+BearSSL::WiFiClientSecure wifiClient;
+BearSSL::X509List mqttCa(MQTT_CA_CERT);
 PubSubClient mqtt(wifiClient);
+
+// BearSSL a besoin de l'heure pour vérifier la validité du certificat. Si le NTP ne répond pas
+// (réseau du labo sans Internet), on prend cette date : postérieure à la création du CA.
+const time_t TLS_FALLBACK_TIME = 1791417600;  // 2026-10-08 00:00 UTC
 
 // --- Durées (ms) ---
 const unsigned long PUBLISH_INTERVAL    = 1000;
@@ -270,7 +278,10 @@ void publishTelemetry() {
 }
 
 void connectMqtt() {
-  Serial.printf("[MQTT] connexion a %s:%u ... ", MQTT_HOST, MQTT_PORT);
+  Serial.printf("[MQTT] connexion TLS a %s:%u ... ", MQTT_HOST, MQTT_PORT);
+
+  time_t t = time(nullptr);
+  wifiClient.setX509Time(t > TLS_FALLBACK_TIME ? t : TLS_FALLBACK_TIME);
 
   String clientId = String("sentinelx-") + DEVICE_ID;
   bool ok;
@@ -285,7 +296,9 @@ void connectMqtt() {
     mqtt.publish(topicStatus, "online", true);
     mqtt.subscribe(topicCmd);
   } else {
-    Serial.printf("echec (code %d)\n", mqtt.state());
+    char sslError[96];
+    int sslCode = wifiClient.getLastSSLError(sslError, sizeof(sslError));
+    Serial.printf("echec (code %d, TLS %d : %s)\n", mqtt.state(), sslCode, sslError);
   }
 }
 
@@ -386,7 +399,15 @@ void setup() {
   WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+  configTime(0, 0, "pool.ntp.org", "time.google.com");
+
+  wifiClient.setTrustAnchors(&mqttCa);
+  wifiClient.setTimeout(5000);
+  // Avec une IP, BearSSL ne sait pas vérifier le nom d'hôte (pas de SAN IP) : on se connecte
+  // par IPAddress, la chaîne de certification reste vérifiée. Avec un nom DNS, tout est vérifié.
+  IPAddress brokerIp;
+  if (brokerIp.fromString(MQTT_HOST)) mqtt.setServer(brokerIp, MQTT_PORT);
+  else                                mqtt.setServer(MQTT_HOST, MQTT_PORT);
   mqtt.setBufferSize(512);
   mqtt.setCallback(onCommand);
 

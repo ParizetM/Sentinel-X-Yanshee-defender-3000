@@ -5,7 +5,7 @@ L'ESP8266 lit les capteurs (température, humidité, gaz, présence), affiche l'
 et publie toutes les mesures sur le broker MQTT. Le buzzer et la LED ne s'allument **que sur commande MQTT**.
 
 ```
-ESP8266 ──publish──▶ Mosquitto (172.16.137.4:1883) ◀──subscribe── API / IA / Dashboard
+ESP8266 ──publish──▶ Mosquitto (172.16.137.4:8883, TLS) ◀──subscribe── API / IA / Dashboard
         ◀──── cmd ────                                ──── cmd ────
 ```
 
@@ -29,7 +29,7 @@ cp include/secrets.example.h include/secrets.h
 #define WIFI_SSID     "..."          // Wi-Fi 2,4 GHz uniquement
 #define WIFI_PASSWORD "..."
 #define MQTT_HOST "172.16.137.4"
-#define MQTT_PORT 1883
+#define MQTT_PORT 8883              // MQTTS uniquement
 #define MQTT_USER "..."
 #define MQTT_PASS "..."              // demander à l'équipe infra
 ```
@@ -51,7 +51,7 @@ cp include/secrets.example.h include/secrets.h
    ```
 
 ### Ce qu'on doit voir
-- Moniteur série : `[WiFi] OK, IP : ...`, puis `[MQTT] connexion a 172.16.137.4:1883 ... OK`, puis une ligne `[MQTT] envoye -> {...}` par seconde.
+- Moniteur série : `[WiFi] OK, IP : ...`, puis `[MQTT] connexion TLS a 172.16.137.4:8883 ... OK`, puis une ligne `[MQTT] envoye -> {...}` par seconde.
 - Écran OLED : IP de la carte, température/humidité, gaz, présence, statut MQTT.
 - Pendant la première minute : `Gaz: chauffe` et `PIR: calib.` (normal, voir §3).
 
@@ -160,14 +160,14 @@ Installer le client : `brew install mosquitto` (ou utiliser [MQTT Explorer](http
 
 ```bash
 # Voir tout le flux
-mosquitto_sub -h 172.16.137.4 -u <user> -P '<mdp>' -t 'sentinelx/#' -v
+mosquitto_sub -h 172.16.137.4 -p 8883 --cafile ca.crt --insecure -u <user> -P '<mdp>' -t 'sentinelx/#' -v
 
 # Allumer / éteindre
-mosquitto_pub -h 172.16.137.4 -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"on","buzzer":"on"}'
-mosquitto_pub -h 172.16.137.4 -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"led":"off","buzzer":"off"}'
+mosquitto_pub -h 172.16.137.4 -p 8883 --cafile ca.crt --insecure -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"target":"all","state":"on","duration_ms":10000}'
+mosquitto_pub -h 172.16.137.4 -p 8883 --cafile ca.crt --insecure -u <user> -P '<mdp>' -t sentinelx/esp-01/cmd -m '{"target":"all","state":"off"}'
 
 # Vérifier que le broker est joignable
-nc -vz 172.16.137.4 1883
+nc -vz 172.16.137.4 8883
 ```
 
 ### Exemple Python (abonnement)
@@ -183,7 +183,9 @@ def on_message(client, userdata, msg):
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.username_pw_set("<user>", "<mdp>")
 client.on_message = on_message
-client.connect("172.16.137.4", 1883, 60)
+client.tls_set(ca_certs="ca.crt")
+client.tls_insecure_set(True)   # broker joint par IP : pas de contrôle du nom d'hôte
+client.connect("172.16.137.4", 8883, 60)
 client.subscribe("sentinelx/+/telemetry")
 client.loop_forever()
 ```
@@ -223,6 +225,6 @@ Ajouter un second boîtier : changer `DEVICE_ID` (`esp-02`) dans `src/main.cpp`,
 
 ## 7. À faire
 
-- [ ] **MQTTS (TLS, port 8883)** avec le certificat CA embarqué : obligatoire selon le cahier des charges.
+- [x] **MQTTS (TLS, port 8883)** avec le certificat CA embarqué (`include/mqtt_ca.h`). Le port 1883 n'est plus utilisé.
 - [ ] Un compte MQTT dédié à l'ESP (`esp`) avec droits limités à `sentinelx/#`, au lieu du compte admin.
 - [ ] Dépôt git + commits réguliers.
