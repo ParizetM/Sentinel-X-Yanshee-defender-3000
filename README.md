@@ -72,7 +72,7 @@ Prototype cyber-physique de surveillance pour les micro-centrales d'AetherCorp. 
 | `roles/`, `inventories/`, `playbooks/`, `ansible.cfg` | Ansible : cluster Galera, Zabbix server et agents | |
 | [`ARCHITECTURE_ROBOT_FLUX.md`](ARCHITECTURE_ROBOT_FLUX.md) | Flux détaillés du robot Yanshee | |
 | `Documentation Infrastructure.pdf`, `Infra (ports, réseau, IP).xlsx` | Documentation infra, VLAN, matrice des ports | |
-| [`livrables/`](livrables/README.md) | Dossier PDF, présentation, poster A3, script de l'oral, sources pour les régénérer | |
+| [`livrables/`](livrables/README.md) | Dossier d'ingénierie (PDF), support de soutenance, poster A3 | |
 
 ---
 
