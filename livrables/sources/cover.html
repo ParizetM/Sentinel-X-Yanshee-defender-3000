@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Sentinel-X · Couverture</title>
+<style>
+:root{
+  --ink:#14181F; --ink2:#3A4452; --steel:#6B7886; --line:#D5DBE1; --mist:#F1F4F6;
+  --hazard:#F2B705; --hazard-soft:#FFF4CC; --alert:#C8372B; --alert-soft:#FBE4E1;
+  --ok:#23824F; --ok-soft:#E0F2E8; --warn:#B86E00; --warn-soft:#FDEBD3;
+}
+@page{ size:A4; margin:0;
+}
+@page :first{ margin:0; @bottom-left{content:none} @bottom-right{content:none} }
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+body{margin:0; font:9.6pt/1.5 "Helvetica Neue",Arial,sans-serif; color:var(--ink); background:#fff}
+h1,h2,h3{font-family:"Avenir Next","Helvetica Neue",Arial,sans-serif; margin:0}
+h1{font-size:21pt; font-weight:700; letter-spacing:-.01em; margin:0 0 4mm; break-after:avoid}
+h1 .num{display:inline-block; min-width:11mm; color:var(--hazard); background:var(--ink); text-align:center; border-radius:2px; margin-right:3mm; padding:0 2mm}
+h2{font-size:12.5pt; font-weight:700; margin:6mm 0 2mm; break-after:avoid}
+h3{font-size:10.2pt; font-weight:700; margin:4mm 0 1.5mm; break-after:avoid}
+p{margin:0 0 2.4mm}
+ul{margin:0 0 2.4mm; padding-left:5mm} li{margin:.6mm 0}
+code{font:8.6pt Menlo,monospace; background:var(--mist); padding:.2mm 1mm; border-radius:2px}
+pre{font:8pt/1.45 Menlo,monospace; background:var(--ink); color:#E9EDF1; padding:3mm 4mm; border-radius:3px; margin:0 0 3mm; white-space:pre-wrap; break-inside:avoid}
+section{break-before:page}
+.lead{font-size:10.6pt; color:var(--ink2); margin-bottom:4mm}
+.muted{color:var(--steel)}
+.small{font-size:8.4pt}
+table{width:100%; border-collapse:collapse; margin:1mm 0 4mm; font-size:8.6pt; break-inside:auto}
+th{background:var(--ink); color:#fff; text-align:left; font-weight:600; padding:1.6mm 2mm}
+td{padding:1.5mm 2mm; border-bottom:1px solid var(--line); vertical-align:top}
+tr{break-inside:avoid}
+tbody tr:nth-child(even) td{background:#FAFBFC}
+.tag{display:inline-block; font-size:7.6pt; font-weight:700; padding:.3mm 1.6mm; border-radius:2px; white-space:nowrap}
+.t-ok{background:var(--ok-soft); color:var(--ok)}
+.t-part{background:var(--warn-soft); color:var(--warn)}
+.t-todo{background:var(--alert-soft); color:var(--alert)}
+.t-crit{background:var(--alert); color:#fff}
+.t-high{background:#E8735F; color:#fff}
+.t-med{background:var(--hazard); color:var(--ink)}
+.t-low{background:var(--line); color:var(--ink2)}
+.t-fix{background:var(--ok); color:#fff}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:5mm; align-items:start}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:4mm}
+.card{border:1px solid var(--line); border-radius:3px; padding:3mm 3.5mm; break-inside:avoid}
+.card h3{margin-top:0}
+.stat{border-radius:3px; padding:3.5mm; background:var(--mist); break-inside:avoid}
+.stat b{display:block; font:700 20pt/1 "Avenir Next","Helvetica Neue",sans-serif; margin-bottom:1.5mm}
+.stat span{font-size:8.4pt; color:var(--ink2)}
+.callout{background:var(--hazard-soft); border-radius:3px; padding:3mm 4mm; margin:2mm 0 4mm; break-inside:avoid}
+.callout.red{background:var(--alert-soft)}
+.fig{margin:2mm 0 4mm; break-inside:avoid}
+.fig svg,.fig img{width:100%; height:auto; display:block}
+.fig figcaption{font-size:8pt; color:var(--steel); margin-top:1.5mm}
+.todo-box{border:1.5px dashed var(--steel); border-radius:3px; padding:6mm; text-align:center; color:var(--steel); font-size:8.6pt; break-inside:avoid}
+.fill td{height:9mm}
+/* cover */
+.cover{height:297mm; background:var(--ink); color:#fff; position:relative; overflow:hidden; padding:26mm 22mm}
+.cover .hz{position:absolute; left:0; right:0; bottom:0; height:16mm; background:repeating-linear-gradient(-45deg,var(--hazard) 0 10mm,var(--ink) 10mm 20mm)}
+.cover .kicker{font:600 9pt "Avenir Next",sans-serif; letter-spacing:.25em; color:var(--hazard); text-transform:uppercase}
+.cover h1{font-size:46pt; line-height:1; margin:10mm 0 4mm; letter-spacing:-.02em}
+.cover .sub{font-size:15pt; color:#C9D1D9; max-width:150mm}
+.cover .meta{position:absolute; left:22mm; right:22mm; bottom:34mm; display:grid; grid-template-columns:1fr 1fr; gap:6mm; font-size:9.5pt; color:#C9D1D9}
+.cover .meta b{display:block; color:#fff; font-size:10pt; margin-bottom:1mm}
+.cover .mark{position:absolute; right:-30mm; top:60mm; opacity:.12}
+.toc{columns:2; column-gap:10mm; font-size:10pt}
+.toc div{display:flex; justify-content:space-between; border-bottom:1px dotted var(--line); padding:1.6mm 0; break-inside:avoid}
+.toc span:first-child b{color:var(--hazard); background:var(--ink); padding:0 1.5mm; margin-right:2mm; border-radius:2px; font-size:8.5pt}
+</style>
+</head>
+<body>
+<!-- ============ COUVERTURE ============ -->
+<div class="cover">
+  <svg class="mark" width="190mm" height="190mm" viewBox="0 0 100 100"><path d="M50 4 L92 20 V50 C92 74 74 90 50 97 C26 90 8 74 8 50 V20 Z" fill="none" stroke="#F2B705" stroke-width="3"/><circle cx="50" cy="52" r="15" fill="none" stroke="#F2B705" stroke-width="3"/><circle cx="50" cy="52" r="5" fill="#F2B705"/></svg>
+  <div class="kicker">AetherCorp Industrial Solutions · Initiative Sentinel-X</div>
+  <h1>Sentinel-X<br>Yanshee Defender 3000</h1>
+  <div class="sub">Rapport d'ingénierie technique du prototype cyber-physique de surveillance des micro-centrales</div>
+  <div class="meta">
+    <div><b>Workshop national EPSI Bac+4</b>Session octobre 2026 · Groupe 7<br>Workshop2026-M1-G7</div>
+    <div><b>Consortium</b>Infra : Elios, Benoit<br>Dev : Felis, Martin, Matis</div>
+  </div>
+  <div class="hz"></div>
+</div>
+
+</body>
+</html>
