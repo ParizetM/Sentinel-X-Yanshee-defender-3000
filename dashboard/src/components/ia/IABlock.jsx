@@ -11,13 +11,18 @@ function IABlock({ ia, cameraUrl, anomaly }) {
       <h2>🤖 Intelligence Artificielle</h2>
 
       {/* ⭐ Jauge IA prédictive */}
-      {anomaly && (
+      {anomaly.available ? (
         <AnomalyGauge
           risk={anomaly.risk}
           history={anomaly.history}
           level={anomaly.level}
           diagnosis={anomaly.diagnosis_label}
         />
+      ) : (
+        <div className="ia-card">
+          <h4>🧠 IA prédictive</h4>
+          <p className="diagnosis">Données de prédiction non disponibles actuellement.</p>
+        </div>
       )}
 
       <div className="ia-grid">

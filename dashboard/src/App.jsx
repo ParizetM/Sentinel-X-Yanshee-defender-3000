@@ -20,7 +20,7 @@ function App() {
   });
 
   const [history, setHistory] = useState([]);
-  const [ia] = useState({
+  const [ia, setIA] = useState({
     personCount: 0,
     detectionsLastHour: 0,
     robotActions: [],
@@ -30,6 +30,7 @@ function App() {
 
   // ⭐ State IA prédictive
   const [anomaly, setAnomaly] = useState({
+    available: false,
     risk: 0,
     level: 'normal',
     diagnosis_label: null,
@@ -57,6 +58,8 @@ function App() {
       const resAlerts = await fetch(`${API_URL}/api/v1/alerts?limit=20`);
       if (resAlerts.ok) {
         const alertList = await resAlerts.json();
+        const latestPersonAlert = alertList.find((a) => a.payload?.person_count !== undefined);
+
         setAlerts(alertList.map((a) => ({
           id: a.id,
           time: new Date(a.created_at).toLocaleTimeString(),
@@ -64,28 +67,44 @@ function App() {
           source: a.source,
           message: a.message,
         })));
+
+        if (latestPersonAlert) {
+          setIA((prev) => ({
+            ...prev,
+            personCount: latestPersonAlert.payload.person_count ?? prev.personCount,
+          }));
+        }
       }
     } catch (err) {
       console.error('Erreur chargement initial', err);
     }
   }, []);
 
-  // ⭐ Récupère l'état IA au démarrage
+  // ⭐ Récupère l'état IA et le nombre de personnes au démarrage
   const loadAnomalyStatus = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/v1/status`);
-      if (res.ok) {
-        const status = await res.json();
-        const devices = status.devices || {};
-        const firstDevice = Object.values(devices)[0];
-        if (firstDevice?.anomaly) {
-          setAnomaly((prev) => ({
-            ...prev,
-            risk: firstDevice.anomaly.risk ?? 0,
-            level: firstDevice.anomaly.level ?? 'normal',
-            diagnosis_label: firstDevice.anomaly.diagnosis_label ?? null,
-          }));
-        }
+      if (!res.ok) return;
+
+      const status = await res.json();
+      const devices = status.devices || {};
+      const yanshee = devices['yanshee-01'] || Object.values(devices).find((device) => device.person_count !== undefined);
+
+      setIA((prev) => ({
+        ...prev,
+        personCount: yanshee?.person_count ?? prev.personCount,
+      }));
+
+      if (yanshee?.anomaly) {
+        setAnomaly((prev) => ({
+          ...prev,
+          available: true,
+          risk: yanshee.anomaly.risk ?? 0,
+          level: yanshee.anomaly.level ?? 'normal',
+          diagnosis_label: yanshee.anomaly.diagnosis_label ?? null,
+        }));
+      } else {
+        setAnomaly((prev) => ({ ...prev, available: false }));
       }
     } catch {
       // Silencieux
@@ -98,6 +117,8 @@ function App() {
     if (msg.type === 'anomaly' && msg.data) {
       const a = msg.data;
       setAnomaly((prev) => ({
+        ...prev,
+        available: true,
         risk: a.risk ?? 0,
         level: a.level ?? 'normal',
         diagnosis_label: a.diagnosis_label ?? null,
