@@ -1,0 +1,128 @@
+---
+# Rôle Zabbix server (PostgreSQL + nginx + agent 2) pour Debian 13
+# Variable à définir dans le vault : zabbix_db_password
+
+- name: Ajouter le dépôt Zabbix 7.0
+  ansible.builtin.apt:
+    deb: https://repo.zabbix.com/zabbix/7.0/debian/pool/main/z/zabbix-release/zabbix-release_latest_7.0+debian13_all.deb
+    state: present
+
+- name: Installer PostgreSQL, Zabbix server, frontend et agent
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - python3-psycopg2
+      - acl
+      - zabbix-server-pgsql
+      - zabbix-frontend-php
+      - php8.4-pgsql
+      - zabbix-nginx-conf
+      - zabbix-sql-scripts
+      - zabbix-agent2
+    state: present
+    update_cache: true
+
+- name: Créer l'utilisateur PostgreSQL zabbix
+  community.postgresql.postgresql_user:
+    name: zabbix
+    password: "{{ zabbix_db_password }}"
+  become: true
+  become_user: postgres
+  no_log: true
+
+- name: Créer la base zabbix
+  community.postgresql.postgresql_db:
+    name: zabbix
+    owner: zabbix
+    encoding: UTF-8
+    template: template0
+  become: true
+  become_user: postgres
+
+- name: Vérifier si le schéma est déjà importé
+  community.postgresql.postgresql_query:
+    login_db: zabbix
+    query: "SELECT to_regclass('public.users') IS NOT NULL AS present"
+  become: true
+  become_user: postgres
+  register: zabbix_schema
+  changed_when: false
+
+- name: Importer le schéma Zabbix
+  ansible.builtin.shell: |
+    set -o pipefail
+    zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | psql -q -v ON_ERROR_STOP=1 zabbix
+  args:
+    executable: /bin/bash
+  become: true
+  become_user: zabbix
+  when: not zabbix_schema.query_result[0].present
+  changed_when: true
+
+- name: Mettre le mot de passe de la base dans zabbix_server.conf
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: '^#?\s*DBPassword='
+    line: "DBPassword={{ zabbix_db_password }}"
+  no_log: true
+  register: zabbix_server_conf
+
+- name: Configurer nginx sur le port 8080
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/nginx.conf
+    regexp: '^#?\s*listen\s+\d+;'
+    line: "        listen          8080;"
+  register: zabbix_nginx_conf
+
+- name: Régler le fuseau horaire PHP
+  ansible.builtin.lineinfile:
+    path: /etc/zabbix/php-fpm.conf
+    regexp: '^;?\s*php_value\[date\.timezone\]'
+    line: "php_value[date.timezone] = Europe/Paris"
+  register: zabbix_php_conf
+
+- name: Configurer le frontend (évite l'assistant web)
+  ansible.builtin.copy:
+    dest: /etc/zabbix/web/zabbix.conf.php
+    owner: root
+    group: www-data
+    mode: "0640"
+    content: |
+      <?php
+      $DB['TYPE']           = 'POSTGRESQL';
+      $DB['SERVER']         = 'localhost';
+      $DB['PORT']           = '0';
+      $DB['DATABASE']       = 'zabbix';
+      $DB['USER']           = 'zabbix';
+      $DB['PASSWORD']       = '{{ zabbix_db_password }}';
+      $DB['SCHEMA']         = '';
+      $DB['DOUBLE_IEEE754'] = true;
+      $ZBX_SERVER_NAME      = 'Zabbix';
+      $IMAGE_FORMAT_DEFAULT = IMAGE_FORMAT_PNG;
+  no_log: true
+
+- name: Démarrer et activer les services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - zabbix-server
+    - zabbix-agent2
+    - php8.4-fpm
+    - nginx
+
+- name: Redémarrer zabbix-server si sa configuration a changé
+  ansible.builtin.service:
+    name: zabbix-server
+    state: restarted
+  when: zabbix_server_conf is changed
+
+- name: Redémarrer nginx et PHP si leur configuration a changé
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - php8.4-fpm
+    - nginx
+  when: zabbix_nginx_conf is changed or zabbix_php_conf is changed

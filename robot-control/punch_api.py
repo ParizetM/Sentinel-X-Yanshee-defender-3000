@@ -4,6 +4,7 @@ import sys
 import time
 import urlparse
 import threading
+import subprocess
 import BaseHTTPServer
 import SocketServer
 import rospy
@@ -14,6 +15,35 @@ DEFAULT_API_KEY = os.environ.get("SENTINEL_API_KEY", "sentinel-x-secret-key-2026
 
 is_busy = False
 action_lock = threading.Lock()
+
+def do_six_seven_action(dry_run=False):
+    global is_busy
+    with action_lock:
+        if is_busy:
+            return
+        is_busy = True
+
+    try:
+        if dry_run:
+            print("[SENTINEL][DRY-RUN] Simulation geste 6 - 7 (Six-Seven) : Aucun mouvement physique declenche.")
+            time.sleep(2.0)
+            print("[SENTINEL][DRY-RUN] Simulation Six-Seven terminee avec succes.")
+            return
+
+        print("[SENTINEL] Execution reelle du geste 6 - 7 (Six-Seven) via python3 /home/pi/six_seven.py...")
+        # Exécute le script six_seven.py
+        script_path = os.environ.get("SIX_SEVEN_SCRIPT", "/home/pi/six_seven.py")
+        if not os.path.exists(script_path):
+            script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "six_seven.py")
+
+        p = subprocess.Popen(["python3", script_path])
+        p.wait()
+        print("[SENTINEL] GESTE 6 - 7 (SIX-SEVEN) TERMINE AVEC SUCCES !")
+    except Exception as e:
+        print("[SENTINEL] Erreur execution Six-Seven:", e)
+    finally:
+        with action_lock:
+            is_busy = False
 
 def do_sentinel_combo(dry_run=False):
     global is_busy
@@ -93,7 +123,7 @@ HTML_PAGE = """<!DOCTYPE html>
         <h1>SENTINEL-X ACTION CONTROLLER</h1>
         <div class="badge">SECURED BY API KEY</div>
         <div class="steps">
-            Séquence : <span>1. Coucou (Victory)</span> ➜ <span>2. Punch Gauche</span> ➜ <span>3. Punch Droit</span>
+            Actions disponibles : <span>Combo Punch (Victory ➜ Gauche ➜ Droit)</span> ou <span>Mème "6 - 7" (Balance + TTS)</span>
         </div>
 
         <div class="input-group">
@@ -107,31 +137,34 @@ HTML_PAGE = """<!DOCTYPE html>
         </div>
 
         <div class="btn-group">
-            <button class="btn" onclick="triggerPunch()">DÉCLENCHER LE COMBO</button>
+            <button class="btn" onclick="triggerAction('/punch', 'Combo Punch')">🥊 DÉCLENCHER PUNCH</button>
+            <button class="btn" style="background: linear-gradient(135deg, #00f3ff, #0066ff);" onclick="triggerAction('/six_seven', 'Geste 6 - 7')">⚖️ DÉCLENCHER 6 - 7</button>
         </div>
 
         <div id="res">En attente d'action...</div>
 
         <div class="url-box">
-            <b>Exemples d'appels sécurisés :</b><br>
-            • Action Réelle :<br>
+            <b>Exemples d'appels sécurisés (GET / POST) :</b><br>
+            • Combo Punch Réel :<br>
             <code>GET /punch?key=sentinel-x-secret-key-2026&dry_run=0</code><br><br>
-            • Simulation (Dry-Run = 1) :<br>
-            <code>GET /punch?key=sentinel-x-secret-key-2026&dry_run=1</code><br><br>
+            • Geste 6 - 7 Réel :<br>
+            <code>GET /six_seven?key=sentinel-x-secret-key-2026&dry_run=0</code><br><br>
+            • Simulation 6 - 7 (Dry-Run = 1) :<br>
+            <code>GET /six_seven?key=sentinel-x-secret-key-2026&dry_run=1</code><br><br>
             • Via Header HTTP :<br>
-            <code>curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/punch?dry_run=0"</code>
+            <code>curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/six_seven?dry_run=0"</code>
         </div>
     </div>
 
     <script>
-        function triggerPunch() {
+        function triggerAction(endpoint, label) {
             var box = document.getElementById('res');
             var key = document.getElementById('apiKey').value.trim();
             var dry = document.getElementById('dryRun').checked ? '1' : '0';
 
-            box.innerText = '⚡ Envoi de la commande sécurisée (Dry-run: ' + dry + ')...';
+            box.innerText = '⚡ Envoi commande ' + label + ' (Dry-run: ' + dry + ')...';
             
-            fetch('/punch?dry_run=' + dry + '&key=' + encodeURIComponent(key), {
+            fetch(endpoint + '?dry_run=' + dry + '&key=' + encodeURIComponent(key), {
                 headers: { 'X-API-KEY': key }
             })
             .then(function(r) {
@@ -141,9 +174,11 @@ HTML_PAGE = """<!DOCTYPE html>
             })
             .then(function(res) {
                 if (res.status === 200) {
-                    box.innerText = '✅ Succès [HTTP ' + res.status + '] : ' + JSON.stringify(res.data, null, 2);
+                    box.innerText = '✅ Succès ' + label + ' [HTTP ' + res.status + '] : ' + JSON.stringify(res.data, null, 2);
                 } else if (res.status === 401) {
                     box.innerText = '⛔ ACCÈS REFUSÉ [HTTP 401] : Clé API invalide ou manquante !';
+                } else if (res.status === 429) {
+                    box.innerText = '⏳ OCCUPÉ [HTTP 429] : Une action est déjà en cours d\'exécution sur le robot.';
                 } else {
                     box.innerText = '⚠️ Code ' + res.status + ' : ' + JSON.stringify(res.data);
                 }
@@ -221,6 +256,44 @@ class PunchHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
 
+        elif path in ("/six_seven", "/six_seven/", "/six-seven", "/six-seven/", "/sixseven", "/sixseven/"):
+            if not self._is_authenticated(query):
+                self.send_response(401)
+                self._send_cors()
+                self.send_header("Content-Type", "application/json")
+                body = '{"status": "unauthorized", "error": "Invalid or missing API Key"}'
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                print("[SENTINEL][SECURITY] Tentative non autorisee bloquee sur /six_seven !")
+                return
+
+            dry_param = query.get("dry_run", query.get("dry-run", ["0"]))[0]
+            is_dry_run = dry_param in ("1", "true", "True", "yes")
+
+            if is_busy:
+                self.send_response(429)
+                self._send_cors()
+                self.send_header("Content-Type", "application/json")
+                body = '{"status": "busy", "message": "Action sequence already in progress"}'
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+
+            t = threading.Thread(target=do_six_seven_action, args=(is_dry_run,))
+            t.daemon = True
+            t.start()
+
+            mode_str = "simulated_dry_run" if is_dry_run else "real_hardware_execution"
+            body = '{"status": "ok", "action": "six_seven", "mode": "%s", "dry_run": %s}' % (mode_str, "true" if is_dry_run else "false")
+            self.send_response(200)
+            self._send_cors()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         elif path == "/":
             self.send_response(200)
             self._send_cors()
@@ -231,6 +304,9 @@ class PunchHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             self.send_error(404)
             self.end_headers()
+
+    def do_POST(self):
+        self.do_GET()
 
 class ThreadedHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     allow_reuse_address = True

@@ -1,0 +1,47 @@
+---
+- hosts: bdd
+  gather_facts: true
+  become: true
+  roles:
+    - role: bdd
+      tags:
+        - bdd
+
+- hosts: galerabootstrap
+  gather_facts: yes
+  become: true
+  roles:
+    - role: galerabootstrap
+      tags:
+        - galerabootstrap
+
+- hosts: replica1
+  gather_facts: yes
+  become: true
+  roles:
+    - role: replica1
+      tags:
+        - replica1
+
+- hosts: replica2
+  gather_facts: yes
+  become: true
+  roles:
+    - role: replica2
+      tags:
+        - replica2
+
+- hosts: zabbix
+  gather_facts: yes
+  become: true
+  roles:
+    - role: zabbix
+      tags:
+        - zabbix
+
+- hosts: all:!zabbix
+  gather_facts: true
+  become: true
+  roles:
+    - role: zabbixagent
+      tags: zabbixagent

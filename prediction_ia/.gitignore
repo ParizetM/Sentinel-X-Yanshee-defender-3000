@@ -1,0 +1,5 @@
+.env
+__pycache__/
+.pytest_cache/
+# Simulations régénérables (python simulate.py --out ...)
+data/sim_*.jsonl
