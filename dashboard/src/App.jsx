@@ -10,6 +10,29 @@ const API_URL = import.meta.env.VITE_API_URL ?? '';
 const WS_URL = import.meta.env.VITE_WS_URL || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws` : 'ws://172.16.137.5:8080/ws');
 const CAMERA_URL = import.meta.env.VITE_CAMERA_URL || '/api/v1/camera/stream';
 
+// Formatage strict à l'heure française (Europe/Paris, 24h)
+function formatFrenchTime(dateInput) {
+  if (!dateInput) return '';
+  let d;
+  if (typeof dateInput === 'string') {
+    let str = dateInput.trim();
+    if (!str.endsWith('Z') && !str.includes('+') && !/-\d\d:\d\d$/.test(str)) {
+      str += 'Z';
+    }
+    d = new Date(str);
+  } else {
+    d = new Date(dateInput);
+  }
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString('fr-FR', {
+    timeZone: 'Europe/Paris',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+}
+
 function App() {
   const [data, setData] = useState({
     temperature: 0,
@@ -46,7 +69,7 @@ function App() {
       if (resHist.ok) {
         const records = await resHist.json();
         setHistory(records.map((r) => ({
-          time: new Date(r.recorded_at).toLocaleTimeString(),
+          time: formatFrenchTime(r.recorded_at),
           temp: r.temperature,
           humidity: r.humidity,
           gas: r.gas_raw,
@@ -59,7 +82,7 @@ function App() {
         const alertList = await resAlerts.json();
         setAlerts(alertList.map((a) => ({
           id: a.id,
-          time: new Date(a.created_at).toLocaleTimeString(),
+          time: formatFrenchTime(a.created_at),
           level: a.level,
           source: a.source,
           message: a.message,
@@ -75,7 +98,7 @@ function App() {
             setIa((prev) => ({
               ...prev,
               photos: photoList.map((p) => {
-                const cTime = p.captured_at ? new Date(p.captured_at).toLocaleTimeString() : new Date().toLocaleTimeString();
+                const cTime = formatFrenchTime(p.captured_at || Date.now());
                 return {
                   id: p.id,
                   url: `${API_URL}${p.url}?t=${Date.now()}`,
@@ -88,7 +111,7 @@ function App() {
             const resPhoto = await fetch(`${API_URL}/api/v1/camera/latest_photo`);
             if (resPhoto.ok) {
               const tsHeader = resPhoto.headers.get('X-Capture-Timestamp');
-              const captureTime = tsHeader ? new Date(tsHeader).toLocaleTimeString() : new Date().toLocaleTimeString();
+              const captureTime = formatFrenchTime(tsHeader || Date.now());
               setIa((prev) => ({
                 ...prev,
                 photos: [
@@ -144,7 +167,7 @@ function App() {
     // ⭐ Réception temps réel d'une photo capturée par l'IA YOLO
     if (msg.type === 'photo') {
       const p = msg.data || {};
-      const captureTime = p.timestamp ? new Date(p.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+      const captureTime = formatFrenchTime(p.timestamp || Date.now());
       const photoUrl = `${API_URL}${p.url || '/api/v1/camera/latest_photo'}?t=${Date.now()}`;
       setIa((prev) => ({
         ...prev,
@@ -176,7 +199,7 @@ function App() {
         ...prev,
         robotActions: [
           {
-            time: new Date().toLocaleTimeString(),
+            time: formatFrenchTime(Date.now()),
             action: actionName,
           },
           ...prev.robotActions.slice(0, 9),
@@ -194,7 +217,7 @@ function App() {
         history: [
           ...prev.history.slice(-60),
           {
-            time: new Date().toLocaleTimeString(),
+            time: formatFrenchTime(Date.now()),
             risk: a.risk ?? 0,
           },
         ],
@@ -207,7 +230,7 @@ function App() {
       setAlerts((prev) => [
         {
           id: a.id ?? Date.now(),
-          time: new Date(a.created_at || Date.now()).toLocaleTimeString(),
+          time: formatFrenchTime(a.created_at || Date.now()),
           level: a.level ?? 'info',
           source: a.source ?? 'unknown',
           message: a.message ?? 'Alerte',
@@ -219,7 +242,7 @@ function App() {
       }
       // Si alerte intrusion : rafraîchir la photo
       if (a.alert_type === 'human_intrusion' || a.source === 'ia_vision') {
-        const captureTime = new Date(a.created_at || Date.now()).toLocaleTimeString();
+        const captureTime = formatFrenchTime(a.created_at || Date.now());
         setTimeout(async () => {
           try {
             const resPhoto = await fetch(`${API_URL}/api/v1/camera/latest_photo`);
@@ -255,7 +278,7 @@ function App() {
       setHistory((prev) => [
         ...prev.slice(-30),
         {
-          time: new Date(t.recorded_at || Date.now()).toLocaleTimeString(),
+          time: formatFrenchTime(t.recorded_at || Date.now()),
           temp: newData.temperature,
           humidity: newData.humidity,
           gas: newData.gas,

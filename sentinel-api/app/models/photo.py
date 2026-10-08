@@ -17,10 +17,17 @@ class CapturedPhoto(Base):
     content_type = Column(String(32), default="image/jpeg")
 
     def to_dict(self):
+        dt = self.captured_at
+        if dt:
+            dt_utc = dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+            captured_iso = dt_utc.isoformat()
+        else:
+            captured_iso = None
+
         return {
             "id": self.id,
             "device_id": self.device_id,
-            "captured_at": self.captured_at.isoformat() if self.captured_at else None,
+            "captured_at": captured_iso,
             "person_count": self.person_count,
             "size_bytes": len(self.image_base64) * 3 // 4 if self.image_base64 else 0,
             "url": f"/api/v1/camera/photos/{self.id}"

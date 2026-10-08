@@ -30,7 +30,12 @@ class Alert(Base):
             except Exception:
                 parsed_payload = {"raw": self.payload_json}
 
-        ts_iso = self.created_at.isoformat() if self.created_at else None
+        dt = self.created_at
+        if dt:
+            dt_utc = dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+            ts_iso = dt_utc.isoformat()
+        else:
+            ts_iso = None
 
         return {
             "id": self.id,

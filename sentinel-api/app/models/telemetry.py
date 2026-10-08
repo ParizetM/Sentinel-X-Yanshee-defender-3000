@@ -1,8 +1,11 @@
 """Modèle SQLAlchemy pour l'historique des mesures (Contrat §4.5 Table measurements)."""
 
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from sqlalchemy import Column, Integer, Float, String, Boolean, DateTime
 from app.database import Base
+
+PARIS_TZ = ZoneInfo("Europe/Paris")
 
 
 class Telemetry(Base):
@@ -23,8 +26,14 @@ class Telemetry(Base):
     led_state = Column(String(16), default="off", nullable=True)
 
     def to_dict(self):
-        iso_time = self.recorded_at.isoformat() if self.recorded_at else None
-        clock_time = self.recorded_at.strftime("%H:%M:%S") if self.recorded_at else None
+        dt = self.recorded_at
+        if dt:
+            dt_utc = dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+            iso_time = dt_utc.isoformat()
+            clock_time = dt_utc.astimezone(PARIS_TZ).strftime("%H:%M:%S")
+        else:
+            iso_time = None
+            clock_time = None
 
         return {
             "id": self.id,
