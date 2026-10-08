@@ -298,3 +298,223 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
+/* ===== JAUGE IA ===== */
+.anomaly-gauge {
+  margin-bottom: 16px;
+}
+
+.gauge-container {
+  margin: 16px 0;
+}
+
+.gauge-value {
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+  transition: color 0.3s;
+}
+
+.gauge-bar {
+  position: relative;
+  height: 24px;
+  background: #0a0e1a;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #1f2a44;
+}
+
+.gauge-fill {
+  height: 100%;
+  transition: width 0.5s, background 0.3s;
+  border-radius: 12px;
+}
+
+.gauge-threshold {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: #ff3355;
+  z-index: 2;
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #8899bb;
+}
+
+.threshold-label {
+  color: #ff3355;
+  font-weight: bold;
+}
+
+.diagnosis {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: rgba(255, 170, 0, 0.1);
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.risk-chart {
+  margin-top: 16px;
+}
+
+/* ===== BADGES SOURCE D'ALERTE ===== */
+.alert-source {
+  font-weight: bold;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0, 229, 255, 0.1);
+  white-space: nowrap;
+}
+
+.source-ia-anomaly {
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+}
+
+.source-ia-vision {
+  background: rgba(200, 100, 255, 0.2);
+  color: #c864ff;
+}
+
+.source-sensor {
+  background: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+}
+
+/* ===== CONTRÔLES ===== */
+.controls {
+  background: #131829;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #1f2a44;
+  margin-bottom: 20px;
+}
+
+.controls h3 {
+  color: #8899bb;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.btn-danger {
+  padding: 14px 28px;
+  background: #ff3355;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #ff5577;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 51, 85, 0.3);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feedback {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.feedback.success {
+  background: rgba(0, 255, 136, 0.1);
+  color: #00ff88;
+  border: 1px solid #00ff88;
+}
+
+.feedback.error {
+  background: rgba(255, 51, 85, 0.1);
+  color: #ff3355;
+  border: 1px solid #ff3355;
+}
+
+/* ===== JAUGE IA ===== */
+.anomaly-gauge {
+  margin-bottom: 16px;
+}
+
+.gauge-container {
+  margin: 16px 0;
+}
+
+.gauge-value {
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+  transition: color 0.3s;
+}
+
+.gauge-bar {
+  position: relative;
+  height: 24px;
+  background: #0a0e1a;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #1f2a44;
+}
+
+.gauge-fill {
+  height: 100%;
+  transition: width 0.5s, background 0.3s;
+  border-radius: 12px;
+}
+
+.gauge-threshold {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: #ff3355;
+  z-index: 2;
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #8899bb;
+}
+
+.threshold-label {
+  color: #ff3355;
+  font-weight: bold;
+}
+
+.diagnosis {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: rgba(255, 170, 0, 0.1);
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.risk-chart {
+  margin-top: 16px;
+}

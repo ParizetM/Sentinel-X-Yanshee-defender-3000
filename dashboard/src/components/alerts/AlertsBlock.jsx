@@ -1,4 +1,3 @@
-
 function AlertsBlock({ alerts = [] }) {
   return (
     <section className="block">
@@ -13,7 +12,12 @@ function AlertsBlock({ alerts = [] }) {
                 {a.level === 'critical' ? '🚨' : a.level === 'warning' ? '⚠️' : 'ℹ️'}
               </span>
               <span className="alert-time">{a.time}</span>
-              <span className="alert-source">[{a.source}]</span>
+              <span className={`alert-source source-${a.source?.replace('_', '-')}`}>
+                {a.source === 'ia_anomaly' ? '🧠 IA' :
+                 a.source === 'ia_vision'  ? '👁️ Vision' :
+                 a.source === 'sensor'     ? '📡 Capteur' :
+                 `[${a.source}]`}
+              </span>
               <span className="alert-message">{a.message}</span>
             </li>
           ))}
