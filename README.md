@@ -235,7 +235,7 @@ ansible-playbook -i inventories/hosts.ini playbooks/deploy.yml --ask-vault-pass
 | MCO | Zabbix (CPU, RAM, disque, disponibilité) sur toutes les VM, healthcheck Docker sur l'API |
 | Secrets | `.env`, `secrets.h` et `vault.yml` hors dépôt (`.gitignore`), modèles `*.example` fournis |
 
-Le rapport d'auto-audit et les résultats du pentest croisé figurent dans le dossier d'ingénierie (`Workshop2026-M1-G7-Dossier.pdf`).
+Le rapport d'auto-audit et les résultats du pentest croisé figurent dans le dossier d'ingénierie (`Workshop2026-B4-G7-Dossier.pdf`).
 
 ---
 

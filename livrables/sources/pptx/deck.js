@@ -108,7 +108,7 @@ s.addText([
   { text: "Workshop national EPSI Bac+4 · Groupe 7", options: { bold: true, color: C.background1, breakLine: true } },
   { text: "Elios · Benoit (Infra)   ·   Felis · Martin · Matis (Dev)", options: { color: C.accent5 } },
 ], { x: 0.8, y: 5.9, w: 9, h: 0.8, fontSize: 16, margin: 0, isTextBox: true, objectName: "equipe" });
-s.addNotes("0:00 – 1:00 · Présentation. Une phrase chacun : prénom et rôle. Puis : « AetherCorp perd ses micro-centrales isolées sous trois menaces à la fois. Notre réponse : Sentinel-X. » Enchaîner sur la variante d'architecture (diapo suivante) avant de lancer le teaser.");
+s.addNotes("ORATEUR : Tous (Felis ouvre). 0:00 – 1:00 · Présentation. Une phrase chacun : prénom et rôle. Puis : « AetherCorp perd ses micro-centrales isolées sous trois menaces à la fois. Notre réponse : Sentinel-X. » Enchaîner sur la variante d'architecture (diapo suivante) avant de lancer le teaser.");
 
 // =====================================================================
 // 2. Trois menaces
@@ -125,7 +125,7 @@ band(s, [
   { text: "Mission : ", options: { bold: true } },
   { text: "un boîtier autonome relié de façon chiffrée à un centre de commandement, avec une IA qui décide." },
 ], { x: 0.6, y: 5.25, w: 12.1, h: 0.75, fill: "FFF4CC", name: "mission", fontSize: 17 });
-s.addNotes("Trois menaces simultanées, une réponse par menace. Insister : les trois briques sont reliées entre elles, c'est la règle éliminatoire du sujet.");
+s.addNotes("ORATEUR : Felis. Trois menaces simultanées, une réponse par menace. Insister : les trois briques sont reliées entre elles, c'est la règle éliminatoire du sujet.");
 
 // =====================================================================
 // 3. Architecture
@@ -153,7 +153,7 @@ arrow(s, 9.35, 2.65, 0.53, 0, HEX.text1, "fleche-sql");
 arrow(s, 9.35, 3.3, 0.55, 0.95, HEX.text1, "fleche-ws");
 const chips = [["Option B du sujet", "PC Serveur Local réparti sur des VM Proxmox"], ["Caméra du robot Yanshee", "à la place de la webcam USB, validée par les coachs"], ["Tout passe par le broker", "sauf la vidéo, en MJPEG direct"]];
 chips.forEach(([a, b], i) => s.addText([{ text: a, options: { bold: true, breakLine: true } }, { text: b, options: { color: C.text2 } }], { x: 0.6 + i * 4.1, y: 6.05, w: 3.9, h: 0.75, fontSize: 13, color: C.text1, margin: 0, valign: "top", isTextBox: true, objectName: "precision-" + (i + 1) }));
-s.addNotes("Rappel de la variante d'architecture (exigé en minute 1). Option B distribuée : le PC Serveur Local est réparti sur des VM Proxmox. La caméra du robot remplace la webcam USB, variante validée par les coachs. Flèches rouges = flux chiffrés TLS.");
+s.addNotes("ORATEUR : Elios. Rappel de la variante d'architecture (exigé en minute 1). Option B distribuée : le PC Serveur Local est réparti sur des VM Proxmox. La caméra du robot remplace la webcam USB, variante validée par les coachs. Flèches rouges = flux chiffrés TLS.");
 
 // =====================================================================
 // 4. Teaser
@@ -162,10 +162,10 @@ pres.addSection({ title: "Teaser et démo" });
 s = pres.addSlide({ masterName: "TITRE_SOMBRE", sectionTitle: "Teaser et démo" });
 s.addText("TEASER · 60 SECONDES", { placeholder: "kicker" });
 s.addText("Sentinel Drop", { placeholder: "title" });
-s.addText("Workshop2026-M1-G7-VidDrop.mp4", { placeholder: "body" });
+s.addText("60 secondes · format vertical", { placeholder: "body" });
 s.addShape(pres.ShapeType.ellipse, { x: 10.2, y: 2.2, w: 2.0, h: 2.0, fill: { color: C.accent1 }, line: { color: C.accent1 }, objectName: "bouton-lecture" });
 s.addShape(pres.ShapeType.triangle, { x: 10.85, y: 2.75, w: 0.85, h: 0.9, fill: { color: C.text1 }, line: { color: C.text1 }, rotate: 90, objectName: "icone-lecture" });
-s.addNotes("1:00 – 2:00 · Lancer la vidéo en plein écran (fichier VidDrop). Ne rien dire pendant la lecture.");
+s.addNotes("ORATEUR : Personne (vidéo). 1:00 – 2:00 · Lancer la vidéo VidDrop en plein écran. Ne rien dire pendant la lecture.");
 
 // =====================================================================
 // 5. Démo live
@@ -187,7 +187,7 @@ steps.forEach(([h, b], i) => {
   s.addText([{ text: h, options: { bold: true, fontSize: 18, color: C.accent1, breakLine: true } }, { text: b, options: { fontSize: 14, color: C.background1 } }],
     { x: x + 0.75, y, w: 5.1, h: 1.45, valign: "top", margin: 0, isTextBox: true, objectName: "etape-" + (i + 1) });
 });
-s.addNotes("2:00 – 5:00 · Démo live, dans cet ordre. Préparer avant : anomaly_service lancé depuis plus de 60 s, boîtier chauffé depuis 60 s, Wireshark ouvert sur le port 8883, terminal SSH prêt. Plan B si le boîtier tombe : simulate.py --scenario demo --publish --speed 5.");
+s.addNotes("ORATEUR : Martin au clavier, Matis raconte, Elios (Wireshark) et Benoit (ufw, SSH). 2:00 – 5:00 · Démo live, dans cet ordre. Préparer avant : anomaly_service lancé depuis plus de 60 s, boîtier chauffé depuis 60 s, Wireshark ouvert sur le port 8883, terminal SSH prêt. Plan B si le boîtier tombe : simulate.py --scenario demo --publish --speed 5.");
 
 // =====================================================================
 // 6. Boîtier
@@ -210,7 +210,7 @@ stat(s, { x: 8.45, y: 1.55, w: 4.25, h: 1.45, big: "TLS 8883", label: "MQTT chif
 stat(s, { x: 8.45, y: 3.15, w: 4.25, h: 1.45, big: "1 Hz", label: "télémétrie JSON, Last Will « offline » si le boîtier tombe", name: "stat-1hz" });
 stat(s, { x: 8.45, y: 4.75, w: 4.25, h: 1.45, big: "0 delay()", label: "boucle non bloquante : capteurs actifs même sans réseau", name: "stat-delay" });
 s.addText("Firmware C++ PlatformIO · RAM 39 % · Flash 40 % · le boîtier ne déclenche aucune alarme seul : c'est le centre de commandement qui décide.", { x: 0.6, y: 5.6, w: 7.4, h: 0.75, fontSize: 13, color: C.text2, margin: 0, valign: "top", isTextBox: true, objectName: "note-firmware" });
-s.addNotes("Le boîtier. Points à dire : TLS avec CA embarqué (pas juste chiffré : le broker est authentifié), Last Will pour détecter une coupure, boucle sans delay. Question probable du jury : pourquoi MQ-135 ? Même brochage analogique que le MQ-2, détection relative à l'air calme.");
+s.addNotes("ORATEUR : Felis. Le boîtier. Points à dire : TLS avec CA embarqué (pas juste chiffré : le broker est authentifié), Last Will pour détecter une coupure, boucle sans delay. Question probable du jury : pourquoi MQ-135 ? Même brochage analogique que le MQ-2, détection relative à l'air calme.");
 
 // =====================================================================
 // 7. IA vision
@@ -229,7 +229,7 @@ flow.forEach(([h, b], i) => {
 stat(s, { x: 0.6, y: 4.3, w: 3.9, h: 1.5, big: "< 100 ms", label: "objectif par trame (sujet), inférence CPU", name: "stat-latence", dark: false });
 stat(s, { x: 4.7, y: 4.3, w: 3.9, h: 1.5, big: "1 / 10 s", label: "photo de preuve maximum : le broker n'est pas saturé", name: "stat-photo", dark: false });
 stat(s, { x: 8.8, y: 4.3, w: 3.9, h: 1.5, big: "5 s", label: "anti-rebond entre deux alertes ou ripostes", name: "stat-rebond", dark: false });
-s.addNotes("La vidéo ne passe pas par MQTT (25 i/s saturerait le broker) : seuls les événements y transitent. YOLO26n nano = plus léger de la famille, temps réel sur CPU. Donner la latence mesurée en démo.");
+s.addNotes("ORATEUR : Martin. La vidéo ne passe pas par MQTT (25 i/s saturerait le broker) : seuls les événements y transitent. YOLO26n nano = plus léger de la famille, temps réel sur CPU. Donner la latence mesurée en démo.");
 
 // =====================================================================
 // 8. IA prédictive : chiffres
@@ -250,7 +250,7 @@ stat(s, { x: 8.3, y: 3.1, w: 4.4, h: 1.45, big: "20 / 20", label: "diagnostics c
 s.addShape(pres.ShapeType.roundRect, { x: 8.3, y: 4.7, w: 4.4, h: 1.45, fill: { color: "FFF4CC" }, line: { color: "FFF4CC" }, rectRadius: 0.06, objectName: "modele-fond" });
 s.addText([{ text: "Pas de if temp > 40", options: { bold: true, breakLine: true } }, { text: "Isolation Forest (le normal) + Random Forest (le diagnostic), un modèle par capteur." }],
   { x: 8.5, y: 4.8, w: 4.0, h: 1.25, fontSize: 14, color: C.text1, margin: 0, valign: "middle", isTextBox: true, objectName: "modele-texte" });
-s.addNotes("Le cœur de l'innovation. Le firmware a des seuils avec une référence adaptative : une fuite lente est absorbée par la référence, il ne la voit jamais. L'IA apprend le normal par capteur et prévient 9 à 22 minutes avant le seuil. Évaluation sur données inédites, 20 tirages par scénario.");
+s.addNotes("ORATEUR : Matis. Le cœur de l'innovation. Le firmware a des seuils avec une référence adaptative : une fuite lente est absorbée par la référence, il ne la voit jamais. L'IA apprend le normal par capteur et prévient 9 à 22 minutes avant le seuil. Évaluation sur données inédites, 20 tirages par scénario.");
 
 // =====================================================================
 // 9. IA prédictive : la preuve
@@ -265,7 +265,7 @@ proofs.forEach(([a, b], i) => {
     { x: 8.9, y: 1.5 + i * 1.3, w: 3.8, h: 1.15, valign: "top", margin: 0, isTextBox: true, objectName: "preuve-" + (i + 1) });
 });
 band(s, [{ text: "Enregistrement réel du 06/10, jamais vu à l'entraînement : ", options: { bold: true } }, { text: "surchauffe, souffle et pic de gaz correctement diagnostiqués." }], { x: 0.6, y: 5.6, w: 12.1, h: 0.7, fill: "F1F4F6", name: "preuve-reelle" });
-s.addNotes("Haut : gaz brut et référence du firmware (pointillés), confondus. Bas : indice de risque par capteur, seuil à 1. L'IA déclenche vers 11 min, le firmware jamais. Limite honnête : normal simulé, à réentraîner sur une heure réelle de la salle.");
+s.addNotes("ORATEUR : Matis. Haut : gaz brut et référence du firmware (pointillés), confondus. Bas : indice de risque par capteur, seuil à 1. L'IA déclenche vers 11 min, le firmware jamais. Limite honnête : normal simulé, à réentraîner sur une heure réelle de la salle.");
 
 // =====================================================================
 // 10. Infra
@@ -282,7 +282,7 @@ vlans.forEach(([h, net, b, f], i) => {
 stat(s, { x: 8.5, y: 1.55, w: 4.2, h: 1.45, big: "3 nœuds", label: "Galera synchrone : le quorum tient si un nœud tombe", name: "stat-galera" });
 stat(s, { x: 8.5, y: 3.15, w: 4.2, h: 1.45, big: "1 VIP", label: "HAProxy : l'API ne voit jamais un nœud isolé", name: "stat-vip" });
 stat(s, { x: 8.5, y: 4.75, w: 4.2, h: 1.45, big: "100 %", label: "des machines supervisées par Zabbix", name: "stat-zabbix" });
-s.addNotes("Proxmox, 4 VLAN en /26. Pourquoi 3 nœuds Galera et pas 2 : avec 2, la perte d'un nœud bloque le cluster (plus de majorité). Démo possible : arrêter un nœud, l'API continue.");
+s.addNotes("ORATEUR : Benoit. Proxmox, 4 VLAN en /26. Pourquoi 3 nœuds Galera et pas 2 : avec 2, la perte d'un nœud bloque le cluster (plus de majorité). Démo possible : arrêter un nœud, l'API continue.");
 
 // =====================================================================
 // 11. Sécurité
@@ -304,7 +304,7 @@ const secRows = [head].concat(sec.map((r, i) => r.map((c, j) => ({
   text: c, options: { fill: { color: i % 2 ? "FFFFFF" : "F1F4F6" }, bold: j === 0 || j === 3, color: j === 3 ? stateColor[c] : HEX.dk1, fontFace: j === 2 ? "Courier New" : undefined },
 }))));
 s.addTable(secRows, { x: 0.6, y: 1.5, w: 12.1, colW: [2.9, 4.0, 3.4, 1.8], fontSize: 14, color: HEX.dk1, rowH: 0.56, border: { type: "none" }, valign: "middle", objectName: "matrice-securite" });
-s.addNotes("Tout ce qui est sur cette diapo se démontre en direct : Wireshark, ufw status, connexion SSH par mot de passe refusée.");
+s.addNotes("ORATEUR : Elios. Tout ce qui est sur cette diapo se démontre en direct : Wireshark, ufw status, connexion SSH par mot de passe refusée.");
 
 // =====================================================================
 // 12. Audit
@@ -331,7 +331,7 @@ s.addText([
   { text: "Failles exploitées : …", options: { fontSize: 16, color: C.background1, breakLine: true } },
   { text: "Correctifs appliqués : …", options: { fontSize: 16, color: C.background1 } },
 ], { x: 7.35, y: 1.8, w: 5.1, h: 4.15, valign: "top", margin: 0, isTextBox: true, objectName: "pentest-resultats", paraSpaceAfter: 14 });
-s.addNotes("À gauche, l'auto-audit du matin et ses correctifs (détail dans le dossier, section 11). À droite, À COMPLÉTER avec le bilan du pentest de l'après-midi.");
+s.addNotes("ORATEUR : Benoit. À gauche, l'auto-audit du matin et ses correctifs (détail dans le dossier, section 11). À droite, À COMPLÉTER avec le bilan du pentest de l'après-midi.");
 
 // =====================================================================
 // 13. Équipe
@@ -347,7 +347,7 @@ days.forEach(([d, t], i) => {
   s.addText(t, { x: x + 0.7, y: 4.25, w: 2.3, h: 0.9, fontSize: 13, color: C.text1, valign: "top", margin: 0, isTextBox: true, objectName: "jour-" + (i + 1) });
 });
 band(s, [{ text: "Méthode : ", options: { bold: true } }, { text: "Jira pour les tâches · une branche par brique, fusion par pull request · commits sémantiques · tests automatisés sur l'API et les IA" }], { x: 0.6, y: 5.55, w: 12.1, h: 0.7, fill: "F1F4F6", name: "methode", fontSize: 14 });
-s.addNotes("Le risque n°1 identifié lundi était l'intégration : on a figé topics MQTT, payloads et routes dès le premier jour. C'est ce qui a permis le bout en bout mercredi.");
+s.addNotes("ORATEUR : Martin. Le risque n°1 identifié lundi était l'intégration : on a figé topics MQTT, payloads et routes dès le premier jour. C'est ce qui a permis le bout en bout mercredi.");
 
 // =====================================================================
 // 14. Conclusion
@@ -361,7 +361,7 @@ s.addImage({ path: path.join(DIR, "shield.png"), x: 8.9, y: 0.9, w: 4.6, h: 4.6,
 const takeaways = [["Bout en bout", "du capteur au dashboard, chiffré"], ["IA qui anticipe", "9 à 22 min avant le seuil"], ["Infra résiliente", "Galera ×3, VLAN, supervision"]];
 takeaways.forEach(([a, b], i) => s.addText([{ text: a, options: { bold: true, color: C.accent1, breakLine: true } }, { text: b, options: { color: C.background2 } }],
   { x: 0.8 + i * 4.0, y: 5.6, w: 3.7, h: 0.9, fontSize: 16, valign: "top", margin: 0, isTextBox: true, objectName: "a-retenir-" + (i + 1) }));
-s.addNotes("Conclure en 15 secondes sur les trois points, puis ouvrir les questions. Si on demande la suite : cluster Mosquitto, réentraînement de l'IA sur les données de la salle, sauvegardes automatisées de la base.");
+s.addNotes("ORATEUR : Felis. Conclure en 15 secondes sur les trois points, puis ouvrir les questions. Si on demande la suite : cluster Mosquitto, réentraînement de l'IA sur les données de la salle, sauvegardes automatisées de la base.");
 
 (async () => {
   await pres.writeFile({ fileName: OUT });

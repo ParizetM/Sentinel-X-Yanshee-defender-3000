@@ -1,15 +1,25 @@
 # Script de l'oral · Sentinel-X · Groupe 7
 
-Support : `Workshop2026-M1-G7-Pres.pptx`. Passage de 10 min, chronométré, coupé net si on dépasse.
+Support : la présentation `pres.pptx` du dépôt. **10 min d'oral** chronométrées (introduction, teaser, démo, pitch), puis **15 min de questions** du jury, à part.
 
-| Temps | Partie | Diapos |
-|---|---|---|
-| 0:00 – 1:00 | Présentation de l'équipe et de la variante d'architecture | 1 à 3 |
-| 1:00 – 2:00 | Teaser | 4 |
-| 2:00 – 5:00 | Démo live | 5 |
-| 5:00 – 10:00 | Pitch, le jury interrompt librement | 6 à 14 |
+| Temps | Partie | Diapos | Qui parle |
+|---|---|---|---|
+| 0:00 – 1:00 | Mise en scène, contexte, variante d'architecture | 1 à 3 | tous, puis Felis, puis Elios |
+| 1:00 – 2:00 | Teaser | 4 | (vidéo) |
+| 2:00 – 5:00 | Démo live | 5 | Martin au clavier, Matis raconte, Elios et Benoit pour les preuves de sécurité |
+| 5:00 – 9:30 | Pitch technique | 6 à 13 | chacun sa partie |
+| 9:30 – 10:00 | Conclusion, puis marge de sécurité | 14 | Felis |
+| après | Questions du jury (15 min) | — | celui dont c'est le domaine répond |
 
-**Orateurs** : la répartition par pôle n'est qu'une proposition, adaptez-la à qui maîtrise quoi. Le texte entre guillemets est à dire à peu près tel quel ; le reste, ce sont des indications. Ne lisez pas, c'est un guide.
+**Le mail des coachs l'exige : chaque membre doit prendre la parole.** La répartition ci-dessous est une proposition : échangez les diapos selon qui a réellement fait quoi, le jury pose ses questions à celui qui a présenté. Le texte entre guillemets est à dire à peu près tel quel, le reste ce sont des indications. Ne lisez pas : c'est un guide.
+
+| Membre | Prend la parole sur |
+|---|---|
+| Elios | Variante d'architecture (3), preuve Wireshark (démo), sécurité (11) |
+| Benoit | Preuve du durcissement (démo), infrastructure (10), audit et pentest (12) |
+| Felis | Contexte (2), boîtier (6), conclusion (14) |
+| Martin | Pilote de la démo, IA de vision (7), méthode d'équipe (13) |
+| Matis | Narration de la démo, IA prédictive (8 et 9) |
 
 ---
 
@@ -27,19 +37,21 @@ Support : `Workshop2026-M1-G7-Pres.pptx`. Passage de 10 min, chronométré, coup
 
 ---
 
-## Diapo 1 · Titre (0:00 – 0:25) · tout le monde
+## Diapo 1 · Titre (0:00 – 0:25) · tous
 
-Chacun se présente en une phrase, en commençant par le pôle Infra.
+Le mail demande de « bien introduire et de se mettre en scène ». Jouez le consortium d'ingénieurs qui livre son produit à AetherCorp.
 
-> « Bonjour. Nous sommes le groupe 7. Elios et Benoit pour l'infrastructure, Felis, Martin et Matis pour le développement. »
+> Felis : « Mesdames et messieurs de la direction d'AetherCorp, merci de nous recevoir. Nous sommes le consortium chargé de l'initiative Sentinel-X. »
 
-> « AetherCorp perd des micro-centrales isolées, attaquées sur trois fronts à la fois. Notre réponse, c'est **Sentinel-X**. »
+Puis chacun dit son prénom et son rôle, en une phrase : Elios, Benoit (infrastructure), Martin, Matis (développement).
 
-## Diapo 2 · Trois menaces (0:25 – 0:40) · Dev
+> Felis : « En 2050, vos micro-centrales isolées sont attaquées sur trois fronts à la fois. Aujourd'hui, nous vous livrons la réponse : **Sentinel-X**. »
+
+## Diapo 2 · Trois menaces (0:25 – 0:40) · Felis
 
 > « Trois menaces, une réponse pour chacune. L'intrusion physique : une IA de vision sur la caméra du robot Yanshee. La fuite de gaz ou la surchauffe : notre boîtier et une IA prédictive. La cyberattaque : du chiffrement partout et des serveurs durcis. Et surtout, tout est relié. »
 
-## Diapo 3 · Variante d'architecture (0:40 – 1:00) · Infra
+## Diapo 3 · Variante d'architecture (0:40 – 1:00) · Elios
 
 Le sujet l'exige dans la première minute.
 
@@ -55,7 +67,7 @@ Montrer les flèches rouges.
 
 Lancer la vidéo en plein écran. **Silence total pendant la lecture.**
 
-## Diapo 5 · Démo live (2:00 – 5:00) · un pilote au clavier, un narrateur
+## Diapo 5 · Démo live (2:00 – 5:00) · Martin au clavier, Matis raconte
 
 Laisser la diapo 2 secondes, puis basculer sur le dashboard. Le narrateur parle, le pilote agit. Comptez environ 30 s par étape.
 
@@ -77,11 +89,11 @@ Puis « Arrêt d'urgence ».
 
 > « Une présence humaine : YOLO la détecte, prend une photo de preuve qui arrive dans la galerie, lève une alerte d'intrusion… et le robot riposte. »
 
-**5. Le chiffrement.** Basculer sur Wireshark.
+**5. Le chiffrement.** Elios prend la parole. Basculer sur Wireshark.
 
 > « Voici le trafic MQTT capturé : c'est du TLS, totalement illisible. »
 
-**6. Le durcissement.** Basculer sur le terminal et lancer `sudo ufw status verbose`.
+**6. Le durcissement.** Benoit prend la parole. Basculer sur le terminal et lancer `sudo ufw status verbose`.
 
 > « Pare-feu actif, tout est fermé par défaut. Et une connexion SSH par mot de passe est refusée : on n'entre qu'avec une clé. »
 
@@ -91,7 +103,7 @@ Puis « Arrêt d'urgence ».
 
 Puis lancer `simulate.py`.
 
-## Diapo 6 · Le boîtier (5:00 – 5:30) · Dev firmware
+## Diapo 6 · Le boîtier (5:00 – 5:35) · Felis
 
 > « Le boîtier, c'est un ESP8266 programmé en C++ : température, humidité, gaz, présence, écran OLED, buzzer et LED. »
 
@@ -99,7 +111,7 @@ Puis lancer `simulate.py`.
 
 > « Et le boîtier ne décide jamais seul de sonner : c'est le centre de commandement qui décide. »
 
-## Diapo 7 · IA de vision (5:30 – 6:00) · Dev IA vision
+## Diapo 7 · IA de vision (5:35 – 6:10) · Martin
 
 > « La caméra du robot envoie du 640 par 480 à 25 images par seconde, encodé par son propre GPU. YOLO26n, le modèle le plus léger de la famille, ne cherche qu'une classe : les personnes. »
 
@@ -107,7 +119,7 @@ Puis lancer `simulate.py`.
 
 Si vous avez mesuré la latence, dites-la ici : « … en ___ millisecondes par image, sous les 100 demandées. »
 
-## Diapo 8 · IA prédictive : les chiffres (6:00 – 6:40) · Dev IA prédictive
+## Diapo 8 · IA prédictive : les chiffres (6:10 – 6:55) · Matis
 
 C'est **notre point fort**. Prenez le temps.
 
@@ -115,23 +127,23 @@ C'est **notre point fort**. Prenez le temps.
 
 > « Notre IA, c'est un Isolation Forest qui apprend le fonctionnement normal, plus un Random Forest qui pose le diagnostic. Un modèle par capteur. Résultat : on détecte une surchauffe lente 22 minutes avant le seuil critique, une fuite lente 9 minutes avant. Et seulement 0,15 fausse alerte par heure. »
 
-## Diapo 9 · Le scénario (6:40 – 7:00) · même orateur
+## Diapo 9 · Le scénario (6:55 – 7:20) · Matis
 
 Montrer le graphique avec le pointeur.
 
 > « Ici le gaz monte à partir de 10 minutes. La référence du firmware le suit, en pointillés : il reste à "normal". En bas, notre indice de risque passe au-dessus de 1 vers 11 minutes. Et on l'a vérifié sur un vrai enregistrement de nos capteurs, que le modèle n'avait jamais vu. »
 
-## Diapo 10 · Infrastructure (7:00 – 7:30) · Infra
+## Diapo 10 · Infrastructure (7:20 – 7:55) · Benoit
 
 > « Côté infra, tout tourne sur Proxmox, en 4 VLAN : le web, la base de données, la supervision, l'automatisation. Un VLAN compromis ne donne pas accès aux autres. »
 
 > « La base, c'est un cluster Galera de 3 nœuds. Pourquoi 3 ? Avec 2, si un nœud tombe, il n'y a plus de majorité et tout se bloque. Devant, une IP virtuelle HAProxy : l'API ne voit jamais un serveur isolé. Tout est supervisé par Zabbix et déployé par Ansible. »
 
-## Diapo 11 · Sécurité (7:30 – 8:00) · Infra
+## Diapo 11 · Sécurité (7:55 – 8:25) · Elios
 
 > « Tout ce qui est sur cette diapo, on vient de vous le montrer en démo, ou on peut vous le montrer maintenant : TLS de bout en bout, HTTPS, pare-feu fermé par défaut, SSH par clé uniquement, réseau segmenté. Et aucun secret dans notre dépôt : tout passe par des fichiers d'environnement. »
 
-## Diapo 12 · Audit et pentest (8:00 – 8:30) · Infra ou Dev
+## Diapo 12 · Audit et pentest (8:25 – 8:55) · Benoit
 
 > « Avant le pentest, on s'est audités nous-mêmes : revue de code de toutes les briques, recherche de secrets, revue des ports et du TLS. Cinq correctifs appliqués dans la foulée, par exemple : le boîtier ne parle plus jamais en clair, et aucun service ne démarre sans ses secrets. »
 
@@ -139,17 +151,21 @@ Puis le bilan du pentest, **à compléter après l'après-midi** :
 
 > « Pendant le pentest croisé, on a subi ___ attaques, dont ___ bloquées. »
 
-## Diapo 13 · Équipe (8:30 – 8:50) · Dev
+## Diapo 13 · Équipe (8:55 – 9:20) · Martin
 
 > « Notre risque numéro un, identifié lundi, c'était l'intégration. Alors on a figé dès le premier jour le contrat entre les briques : les topics MQTT, les formats JSON, les routes de l'API. C'est ce qui nous a permis d'avoir la chaîne complète dès mercredi. Une branche par brique, des pull requests, des tests automatisés. »
 
-## Diapo 14 · Conclusion (8:50 – 9:00) · la personne qui a ouvert
+## Diapo 14 · Conclusion (9:20 – 9:40) · Felis
 
-> « Sentinel-X, c'est trois choses : une chaîne chiffrée de bout en bout, une IA qui anticipe la panne, et une infrastructure qui encaisse les pannes. **Sentinel-X : la sécurité à la bordure.** Merci, on attend vos questions. »
+> « Sentinel-X, c'est trois choses : une chaîne chiffrée de bout en bout, une IA qui anticipe la panne, et une infrastructure qui encaisse les pannes. **Sentinel-X : la sécurité à la bordure.** Merci. Nous sommes à votre disposition pour vos questions. »
 
 ---
 
-## Questions probables du jury
+## Questions du jury (15 min, après l'oral)
+
+Règle : **celui qui a présenté la partie répond**, les autres complètent seulement si besoin. Firmware et boîtier : Felis. Vision et robot : Martin. IA prédictive : Matis. Réseau, Galera, Zabbix, Ansible, audit et pentest : Benoit. TLS, pare-feu, SSH, architecture : Elios.
+
+### Questions probables
 
 | Question | Réponse courte |
 |---|---|
