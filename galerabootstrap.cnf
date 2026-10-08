@@ -1,0 +1,35 @@
+[mysqld]
+#####################
+#mysql settings
+#####################
+
+log_bin=1
+log_slave_updates=1
+sync_binlog=1
+binlog_format=ROW
+
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+query_cache_size=1M
+query_cache_type=OFF
+
+innodb_flush_log_at_trx_commit=0
+innodb_buffer_pool_size=256M
+
+bind-address=0.0.0.0
+
+#####################
+# Galera settings
+#####################
+wsrep_provider=/usr/lib/libgalera_smm.so
+wsrep_cluster_name="cluster-grp7"
+# ici, on ne précise rien pour le moment.
+# On renseignera ensuite les IPs des membres
+# du cluster. Mais pour l'init du cluster
+# on laisse "gcomm://" vide
+wsrep_cluster_address="gcomm://"
+wsrep_sst_auth=sst_backup:Epsi123!
+wsrep_sst_method=rsync
+wsrep_on=ON
+wsrep_node_address="172.16.137.1"
+wsrep_node_name="WORKSHOP-GRP7-BDD1"

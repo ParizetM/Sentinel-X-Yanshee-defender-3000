@@ -1,0 +1,15 @@
+---
+- name: copy galera config file
+  template:
+    src: galera_replica.cnf
+    dest: /etc/mysql/conf.d/galera.cnf
+    owner: root
+    group: root
+    mode: "0644"
+  register: galeraconfig
+
+- name: Restart mariadb if galera config has been modified
+  systemd_service:
+    name: mariadb.service
+    state: restarted
+  when: galeraconfig.changed
