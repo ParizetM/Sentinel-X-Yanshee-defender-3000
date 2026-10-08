@@ -71,7 +71,7 @@ async def test_auth_login_endpoint(client: AsyncClient):
     assert bad_res.status_code == 401
 
     # Succès
-    good_res = await client.post("/api/v1/auth/login", json={"username": "admin", "password": "Epsi1234.!"})
+    good_res = await client.post("/api/v1/auth/login", json={"username": "admin", "password": "test-password"})
     assert good_res.status_code == 200
     assert "access_token" in good_res.json()
 

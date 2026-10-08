@@ -1,0 +1,5 @@
+# Modèle des variables secrètes Ansible.
+# Copier vers group_vars/<groupe>/vault.yml, renseigner, puis chiffrer :
+#   ansible-vault encrypt group_vars/<groupe>/vault.yml
+zabbix_db_password: "<mot_de_passe_bdd_zabbix>"
+galera_sst_password: "<mot_de_passe_sst_galera>"

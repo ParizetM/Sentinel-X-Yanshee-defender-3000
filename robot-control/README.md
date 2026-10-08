@@ -11,7 +11,7 @@ Conformément aux attendus de durcissement et de protection contre le pentest cr
 * **Modes d'authentification supportés :**
   1. **Header HTTP (Recommandé en production / Docker) :** `X-API-KEY: <cle_api>`
   2. **Query Parameter (Pratique pour les tests web) :** `?key=<cle_api>`
-* **Clé API configurée :** `sentinel-x-secret-key-2026` (personnalisable via variable d'environnement `SENTINEL_API_KEY`).
+* **Clé API configurée :** `$SENTINEL_API_KEY` (personnalisable via variable d'environnement `SENTINEL_API_KEY`).
 
 ---
 
@@ -27,7 +27,7 @@ Pour tester l'infrastructure, l'intégration Docker, les tests de charge ou vali
 
 ### A. Simulation (Dry-Run = 1)
 ```bash
-curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/punch?dry_run=1"
+curl -H "X-API-KEY: $SENTINEL_API_KEY" "http://10.0.3.234:5000/punch?dry_run=1"
 ```
 *Réponse retournée :*
 ```json
@@ -41,7 +41,7 @@ curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/punch?dr
 
 ### B. Action Réelle Moteurs (Dry-Run = 0)
 ```bash
-curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/punch?dry_run=0"
+curl -H "X-API-KEY: $SENTINEL_API_KEY" "http://10.0.3.234:5000/punch?dry_run=0"
 ```
 *Réponse retournée :*
 ```json
@@ -55,7 +55,7 @@ curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/punch?dr
 
 ### C. Test dans le Navigateur Web
 Ouvrez l'interface graphique :
-👉 **`http://10.0.3.234:5000/?key=sentinel-x-secret-key-2026`**
+👉 **`http://10.0.3.234:5000/?key=$SENTINEL_API_KEY`**
 Une case à cocher permet d'activer ou désactiver le mode Dry-Run à la volée avant de cliquer sur le bouton de frappe.
 
 ---
@@ -66,7 +66,7 @@ Une case à cocher permet d'activer ou désactiver le mode Dry-Run à la volée 
 import requests
 
 ROBOT_ACTION_URL = "http://10.0.3.234:5000/punch"
-API_KEY = "sentinel-x-secret-key-2026"
+API_KEY = os.environ["SENTINEL_API_KEY"]
 
 def trigger_punch(dry_run=False):
     headers = {

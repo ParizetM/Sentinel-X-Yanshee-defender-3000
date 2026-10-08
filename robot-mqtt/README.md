@@ -38,7 +38,7 @@ Ce module permet de piloter le robot **Yanshee** à 100% via le broker central *
 * **Hôte :** `172.16.137.4`
 * **Port :** `8883` (SSL/TLS)
 * **Utilisateur :** `admin`
-* **Mot de passe :** `Epsi1234.!`
+* **Mot de passe :** défini par `MQTT_PASSWORD` dans le `.env` (hors dépôt)
 
 ---
 

@@ -9,8 +9,8 @@ from app.database import get_db
 
 router = APIRouter(tags=["Camera & Video (Contrat §4.4)"])
 
-# URL par défaut du flux matériel Yanshee (GPU VideoCore IV)
-ROBOT_STREAM_URL = "http://10.0.3.234:8000/stream.mjpg?key=sentinel-x-secret-key-2026"
+# URL du flux matériel Yanshee (GPU VideoCore IV), clé comprise : définie dans le .env
+ROBOT_STREAM_URL = settings.ROBOT_STREAM_URL
 
 
 @router.get(

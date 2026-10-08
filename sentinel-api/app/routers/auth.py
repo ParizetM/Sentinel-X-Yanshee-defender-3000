@@ -9,7 +9,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Authentication (Contrat §4.4)"
 
 class LoginRequest(BaseModel):
     username: str = Field(..., examples=["admin"])
-    password: str = Field(..., examples=["Epsi1234.!"])
+    password: str = Field(..., examples=["********"])
 
 
 class TokenResponse(BaseModel):
@@ -25,12 +25,10 @@ class TokenResponse(BaseModel):
     description="Authentifie un opérateur ou un service et délivre le jeton API."
 )
 async def login(credentials: LoginRequest):
-    # Identifiants de l'équipe (validés pour la soutenance et le labo)
-    valid_users = {
-        "admin": "Epsi1234.!",
-        "supervisor": "Sentinel2026!",
-        "martin": "Sentinel2026!"
-    }
+    # Identifiants lus depuis API_USERS ("login:motdepasse,..."), jamais en dur dans le code
+    valid_users = dict(
+        entry.split(":", 1) for entry in settings.API_USERS.split(",") if ":" in entry
+    )
 
     if credentials.username in valid_users and valid_users[credentials.username] == credentials.password:
         return {

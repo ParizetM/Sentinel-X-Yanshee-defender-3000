@@ -49,7 +49,7 @@ Le robot Yanshee joue le rôle de **Sentinelle Cyber-Physique Avancée** sur la 
   * Encodage direct par le GPU VideoCore IV du Raspberry Pi (zéro surcharge processeur).
   * Résolution 640x480 à 25 FPS, qualité 60% (conforme aux exigences de latence < 100 ms).
   * Zéro buffer de cache pour une réactivité instantanée.
-* **Sécurité :** Accès conditionné par la clé d'API (`sentinel-x-secret-key-2026`).
+* **Sécurité :** Accès conditionné par la clé d'API (`$SENTINEL_API_KEY`).
 
 ### B. Mouvements & Contrôle Moteur (ROS Kinetic)
 * **Actionneurs :** 17 servomoteurs numériques intelligents pilotés par le microcontrôleur STM32 via ROS.
@@ -71,13 +71,13 @@ La vidéo haute fréquence (25 FPS) ne passe pas par MQTT pour éviter d'engorge
 
 | Émetteur | Récepteur | Protocole / Port | URL / Ressource | Payload | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Robot** (`10.0.3.234`) | **VM IA** (`172.16.137.6`) | HTTP / 8000 | `/stream.mjpg?key=sentinel-x-secret-key-2026` | Trame continue multipart JPEG | Flux vidéo temps réel analysé par YOLO |
-| **Robot** (`10.0.3.234`) | **Navigateur / React** | HTTP / 8000 | `/?key=sentinel-x-secret-key-2026` | HTML + flux MJPEG | Visualisation directe de la caméra |
+| **Robot** (`10.0.3.234`) | **VM IA** (`172.16.137.6`) | HTTP / 8000 | `/stream.mjpg?key=$SENTINEL_API_KEY` | Trame continue multipart JPEG | Flux vidéo temps réel analysé par YOLO |
+| **Robot** (`10.0.3.234`) | **Navigateur / React** | HTTP / 8000 | `/?key=$SENTINEL_API_KEY` | HTML + flux MJPEG | Visualisation directe de la caméra |
 
 ---
 
 ### 3.2 Flux Événements & Commandes (Broker Mosquitto `172.16.137.4:8883`)
-Tous les signaux décisionnels, alertes et déclenchements transitent par Mosquitto avec authentification (`admin` / `Epsi1234.!`).
+Tous les signaux décisionnels, alertes et déclenchements transitent par Mosquitto avec authentification (identifiants dans le `.env`, hors dépôt).
 
 ```
   VM IA (YOLO)                     BROKER MOSQUITTO                   ROBOT YANSHEE

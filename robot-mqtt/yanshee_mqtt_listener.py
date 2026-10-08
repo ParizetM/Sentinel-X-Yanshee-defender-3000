@@ -15,8 +15,8 @@ import paho.mqtt.client as mqtt
 # Configuration Broker Mosquitto
 MQTT_HOST = os.environ.get("MQTT_BROKER_HOST", "172.16.137.4")
 MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT", "8883"))
-MQTT_USER = os.environ.get("MQTT_USERNAME", "admin")
-MQTT_PASSWORD = os.environ.get("MQTT_PASSWORD", "Epsi1234.!")
+MQTT_USER = os.environ.get("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.environ.get("MQTT_PASSWORD", "")
 
 # Topics MQTT
 TOPIC_COMMAND = "detection_robot/command"

@@ -106,7 +106,7 @@ async def test_acknowledge_alert_requires_auth(client: AsyncClient):
     res_auth = await client.put(
         f"/api/v1/alerts/{alert_id}/acknowledge",
         json={"acknowledged_by": "martin"},
-        headers={"Authorization": "Bearer sentinel-x-secret-key-2026"}
+        headers={"Authorization": "Bearer test-api-key"}
     )
     assert res_auth.status_code == 200
     assert res_auth.json()["acknowledged"] is True

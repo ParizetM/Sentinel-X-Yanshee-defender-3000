@@ -8,7 +8,10 @@ import BaseHTTPServer
 import SocketServer
 import urlparse
 
-DEFAULT_API_KEY = os.environ.get("SENTINEL_API_KEY", "sentinel-x-secret-key-2026")
+DEFAULT_API_KEY = os.environ.get("SENTINEL_API_KEY", "")
+
+if not DEFAULT_API_KEY:
+    raise SystemExit("SENTINEL_API_KEY manquante : definir la cle dans le .env (voir .env.robot.example)")
 
 class StreamingOutput(object):
     def __init__(self):
@@ -64,7 +67,7 @@ class StreamingHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
 
         if path in ("/", "/index.html"):
-            api_k = query.get("key", ["sentinel-x-secret-key-2026"])[0]
+            api_k = query.get("key", [""])[0]
             content = ("""<!DOCTYPE html>
 <html>
 <head><title>SENTINEL-X SECURE FEED</title></head>

@@ -6,6 +6,7 @@ Déclenche le Buzzer pendant 1 seconde, puis la LED d'alerte pendant 1 seconde,
 ou les deux simultanément.
 """
 
+import os
 import sys
 import json
 import time
@@ -13,10 +14,10 @@ import ssl
 import paho.mqtt.client as mqtt
 
 # Configuration Mosquitto
-BROKER_HOST = "172.16.137.4"
+BROKER_HOST = os.environ.get("MQTT_BROKER_HOST", "172.16.137.4")
 BROKER_PORT = 8883
-BROKER_USER = "admin"
-BROKER_PASS = "Epsi1234.!"
+BROKER_USER = os.environ.get("MQTT_USERNAME", "")
+BROKER_PASS = os.environ.get("MQTT_PASSWORD", "")
 
 DEVICE_ID = "esp-01"
 CMD_TOPIC = "sentinelx/{}/cmd".format(DEVICE_ID)

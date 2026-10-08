@@ -13,6 +13,11 @@ from app.main import app
 # Désactiver MQTT pendant les tests
 settings.MQTT_ENABLED = False
 
+# Secrets factices réservés aux tests
+TEST_API_KEY = "test-api-key"
+settings.API_SECRET_KEY = TEST_API_KEY
+settings.API_USERS = "admin:test-password"
+
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 test_engine = create_async_engine(

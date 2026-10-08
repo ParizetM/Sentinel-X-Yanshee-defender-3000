@@ -28,7 +28,7 @@ wsrep_cluster_name="cluster-grp7"
 # du cluster. Mais pour l'init du cluster
 # on laisse "gcomm://" vide
 wsrep_cluster_address="gcomm://"
-wsrep_sst_auth=sst_backup:Epsi123!
+wsrep_sst_auth=sst_backup:{{ galera_sst_password }}
 wsrep_sst_method=rsync
 wsrep_on=ON
 wsrep_node_address="172.16.137.1"

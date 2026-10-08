@@ -101,7 +101,7 @@ Testé sur des données que le modèle n'avait **jamais vues**, avec 20 essais p
 
 - Le service doit pouvoir joindre **Mosquitto en MQTTS (8883)** et l'**API en HTTPS**.
 - Fournir à la personne qui lance le service : l'IP du broker, un compte MQTT (lecture `sentinelx/+/telemetry`, écriture `sentinelx/+/anomaly`), le chemin du `ca.crt`, l'URL de l'API.
-- **Changer le mot de passe `Epsi1234.!`** : il traîne dans l'historique Git et en dur dans `sentinel-api`. Le pentest de jeudi le trouvera.
+- **Changer le mot de passe du broker** : il traîne dans l'historique Git et en dur dans `sentinel-api`. Le pentest de jeudi le trouvera.
 - Sur quelle machine tourne le service : n'importe laquelle qui voit le broker et l'API (VM API ou laptop IA). Il ne faut pas de GPU, et il consomme très peu.
 
 ### API

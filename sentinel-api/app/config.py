@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8080
     API_DEBUG: bool = True
-    API_SECRET_KEY: str = "sentinel-x-secret-key-2026"
+    API_SECRET_KEY: str = ""
+    # Comptes du dashboard, format "login:motdepasse,login2:motdepasse2" (dans le .env, hors dépôt)
+    API_USERS: str = ""
 
     # Database
     DATABASE_URL: str = "sqlite+aiosqlite:///./sentinel.db"
@@ -19,8 +21,8 @@ class Settings(BaseSettings):
     # MQTT
     MQTT_BROKER_HOST: str = "172.16.137.4"
     MQTT_BROKER_PORT: int = 8883
-    MQTT_USERNAME: Optional[str] = "admin"
-    MQTT_PASSWORD: Optional[str] = "Epsi1234.!"
+    MQTT_USERNAME: Optional[str] = None
+    MQTT_PASSWORD: Optional[str] = None
     MQTT_USE_TLS: bool = True
     MQTT_CA_CERT_PATH: Optional[str] = None
     MQTT_CLIENT_ID: str = "sentinel-x-api-backend"
@@ -33,9 +35,10 @@ class Settings(BaseSettings):
     MQTT_ROBOT_CMD_TOPIC: str = "detection_robot/command"
     MQTT_ROBOT_STATUS_TOPIC: str = "detection_robot/action_status"
 
-    # Streaming Video
-    YOLO_STREAM_URL: str = "http://172.16.137.6:8080/stream.mjpg?key=sentinel-x-secret-key-2026"
-    ROBOT_STREAM_URL: str = "http://10.0.3.234:8000/stream.mjpg?key=sentinel-x-secret-key-2026"
+    # Flux vidéo relayés au dashboard (clé comprise dans l'URL, à définir dans le .env) :
+    # flux annoté de la VM IA, puis flux brut du robot en repli
+    YOLO_STREAM_URL: str = ""
+    ROBOT_STREAM_URL: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

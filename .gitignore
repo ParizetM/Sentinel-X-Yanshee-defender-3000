@@ -9,3 +9,11 @@
 
 # macOS
 .DS_Store
+
+# Secrets : jamais versionnés (modèles *.example fournis)
+.env
+.env.*
+!.env*.example
+**/vault.yml
+sentinel-x-firmware/include/secrets.h
+*.zip

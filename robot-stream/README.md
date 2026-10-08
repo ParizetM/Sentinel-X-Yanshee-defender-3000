@@ -9,8 +9,8 @@ Ce module capture la caméra frontale du robot Yanshee avec **accélération mat
 Pour empêcher les écoutes illégitimes et les captures d'images par des attaquants lors du pentest :
 * **Accès conditionné par Clé API :** Toute tentative d'accès sans clé est bloquée avec `HTTP 401 Unauthorized`.
 * **Modes d'authentification :**
-  * Par URL : `http://10.0.3.234:8000/stream.mjpg?key=sentinel-x-secret-key-2026`
-  * Par Header HTTP : `X-API-KEY: sentinel-x-secret-key-2026`
+  * Par URL : `http://10.0.3.234:8000/stream.mjpg?key=$SENTINEL_API_KEY`
+  * Par Header HTTP : `X-API-KEY: $SENTINEL_API_KEY`
 
 ---
 
@@ -19,7 +19,7 @@ Pour empêcher les écoutes illégitimes et les captures d'images par des attaqu
 ```python
 import cv2
 
-STREAM_URL = "http://10.0.3.234:8000/stream.mjpg?key=sentinel-x-secret-key-2026"
+STREAM_URL = "http://10.0.3.234:8000/stream.mjpg?key=" + os.environ["SENTINEL_API_KEY"]
 
 cap = cv2.VideoCapture(STREAM_URL)
 

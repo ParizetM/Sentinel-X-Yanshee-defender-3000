@@ -59,7 +59,7 @@ une VM sans écran), puis installe et démarre le service systemd.
 Reprendre le `.env` de la machine de dev, avec ces différences :
 
 ```ini
-SENTINEL_API_KEY=sentinel-x-secret-key-2026   # clé du flux exposé
+SENTINEL_API_KEY=$SENTINEL_API_KEY   # clé du flux exposé
 STREAM_HOST=0.0.0.0                           # écoute sur toutes les interfaces
 STREAM_PORT=8080
 SHOW_WINDOW=false                             # OBLIGATOIRE : la VM n'a pas d'écran

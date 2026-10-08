@@ -11,7 +11,9 @@ import rospy
 import ubt_msgs.srv
 
 # Clé API par défaut (peut être surchargée via la variable d'environnement SENTINEL_API_KEY)
-DEFAULT_API_KEY = os.environ.get("SENTINEL_API_KEY", "sentinel-x-secret-key-2026")
+DEFAULT_API_KEY = os.environ.get("SENTINEL_API_KEY", "")
+if not DEFAULT_API_KEY:
+    raise SystemExit("SENTINEL_API_KEY manquante : definir la cle dans le .env (voir .env.robot.example)")
 
 is_busy = False
 action_lock = threading.Lock()
@@ -128,7 +130,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
         <div class="input-group">
             <label for="apiKey">Clé d'authentification API (Header X-API-KEY ou ?key=) :</label>
-            <input type="text" id="apiKey" value="sentinel-x-secret-key-2026">
+            <input type="password" id="apiKey" value="">
         </div>
 
         <div class="checkbox-container">
@@ -146,13 +148,13 @@ HTML_PAGE = """<!DOCTYPE html>
         <div class="url-box">
             <b>Exemples d'appels sécurisés (GET / POST) :</b><br>
             • Combo Punch Réel :<br>
-            <code>GET /punch?key=sentinel-x-secret-key-2026&dry_run=0</code><br><br>
+            <code>GET /punch?key=&lt;SENTINEL_API_KEY&gt;&dry_run=0</code><br><br>
             • Geste 6 - 7 Réel :<br>
-            <code>GET /six_seven?key=sentinel-x-secret-key-2026&dry_run=0</code><br><br>
+            <code>GET /six_seven?key=&lt;SENTINEL_API_KEY&gt;&dry_run=0</code><br><br>
             • Simulation 6 - 7 (Dry-Run = 1) :<br>
-            <code>GET /six_seven?key=sentinel-x-secret-key-2026&dry_run=1</code><br><br>
+            <code>GET /six_seven?key=&lt;SENTINEL_API_KEY&gt;&dry_run=1</code><br><br>
             • Via Header HTTP :<br>
-            <code>curl -H "X-API-KEY: sentinel-x-secret-key-2026" "http://10.0.3.234:5000/six_seven?dry_run=0"</code>
+            <code>curl -H "X-API-KEY: $SENTINEL_API_KEY" "http://10.0.3.234:5000/six_seven?dry_run=0"</code>
         </div>
     </div>
 
