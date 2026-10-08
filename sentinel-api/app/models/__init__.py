@@ -3,5 +3,6 @@
 from app.models.telemetry import Telemetry
 from app.models.alert import Alert
 from app.models.audit import ActuatorAuditLog
+from app.models.photo import CapturedPhoto
 
-__all__ = ["Telemetry", "Alert", "ActuatorAuditLog"]
+__all__ = ["Telemetry", "Alert", "ActuatorAuditLog", "CapturedPhoto"]

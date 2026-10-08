@@ -1,9 +1,11 @@
 """Routeur de flux vidéo et captures pour le Dashboard (Contrat §4.4 & KAN-44 / US-7.3)."""
 
 import httpx
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Depends
 from fastapi.responses import StreamingResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
+from app.database import get_db
 
 router = APIRouter(tags=["Camera & Video (Contrat §4.4)"])
 
@@ -80,5 +82,56 @@ async def get_latest_photo():
     return Response(
         content=content,
         media_type="image/jpeg",
+        headers=headers
+    )
+
+
+@router.get(
+    "/api/v1/camera/photos",
+    summary="Historique des photos d'intrusion enregistrées en BDD",
+    description="Retourne la liste paginée des clichés capturés avec métadonnées."
+)
+async def list_captured_photos(
+    limit: int = 20,
+    db: AsyncSession = Depends(get_db)
+):
+    from app.models.photo import CapturedPhoto
+    from sqlalchemy import select, desc
+
+    query = select(CapturedPhoto).order_by(desc(CapturedPhoto.captured_at)).limit(limit)
+    result = await db.execute(query)
+    photos = result.scalars().all()
+    return [p.to_dict() for p in photos]
+
+
+@router.get(
+    "/api/v1/camera/photos/{photo_id}",
+    summary="Télécharger / afficher une photo d'intrusion par son ID",
+    description="Retourne le binaire JPEG stocké dans le cluster MariaDB Galera."
+)
+async def get_photo_by_id(
+    photo_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    from app.models.photo import CapturedPhoto
+    from sqlalchemy import select
+
+    query = select(CapturedPhoto).where(CapturedPhoto.id == photo_id)
+    result = await db.execute(query)
+    photo = result.scalar_one_or_none()
+
+    if not photo or not photo.image_bytes:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Photo #{photo_id} introuvable en base de données"
+        )
+
+    headers = {}
+    if photo.captured_at:
+        headers["X-Capture-Timestamp"] = photo.captured_at.isoformat()
+
+    return Response(
+        content=photo.image_bytes,
+        media_type=photo.content_type or "image/jpeg",
         headers=headers
     )

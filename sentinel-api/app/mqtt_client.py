@@ -12,6 +12,7 @@ from app.config import settings
 from app.database import async_session_factory
 from app.models.telemetry import Telemetry
 from app.models.alert import Alert
+from app.models.photo import CapturedPhoto
 from app.websocket_manager import ws_manager
 
 logger = logging.getLogger("sentinel.mqtt")
@@ -122,11 +123,32 @@ class SentinelMQTTClient:
                         f.write(latest_photo_timestamp)
                 except Exception:
                     pass
+
+                # Sauvegarde en Base de Données MariaDB Galera
+                photo_id = None
+                try:
+                    async with async_session_factory() as session:
+                        p_entry = CapturedPhoto(
+                            device_id="yanshee-01",
+                            captured_at=datetime.now(timezone.utc),
+                            person_count=device_status_cache.get("yanshee-01", {}).get("person_count", 1),
+                            image_bytes=payload_bytes,
+                            content_type="image/jpeg"
+                        )
+                        session.add(p_entry)
+                        await session.commit()
+                        await session.refresh(p_entry)
+                        photo_id = p_entry.id
+                        logger.info(f"[DB] Photo d'intrusion sauvegardée en base (ID: {photo_id})")
+                except Exception as e:
+                    logger.error(f"[DB] Erreur sauvegarde photo en BDD: {e}")
+
                 await ws_manager.broadcast({
                     "type": "photo",
                     "data": {
+                        "id": photo_id,
                         "timestamp": latest_photo_timestamp,
-                        "url": "/api/v1/camera/latest_photo"
+                        "url": f"/api/v1/camera/photos/{photo_id}" if photo_id else "/api/v1/camera/latest_photo"
                     }
                 })
                 return

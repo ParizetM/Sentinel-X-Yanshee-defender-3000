@@ -66,22 +66,41 @@ function App() {
         })));
       }
 
-      // ⭐ Chargement de la dernière photo capturée
+      // ⭐ Chargement de l'historique des photos depuis MariaDB Galera
       try {
-        const resPhoto = await fetch(`${API_URL}/api/v1/camera/latest_photo`);
-        if (resPhoto.ok) {
-          const tsHeader = resPhoto.headers.get('X-Capture-Timestamp');
-          const captureTime = tsHeader ? new Date(tsHeader).toLocaleTimeString() : new Date().toLocaleTimeString();
-          setIa((prev) => ({
-            ...prev,
-            photos: [
-              {
-                url: `${API_URL}/api/v1/camera/latest_photo?t=${Date.now()}`,
-                time: captureTime,
-                label: `Intrusion (${captureTime})`,
-              },
-            ],
-          }));
+        const resPhotos = await fetch(`${API_URL}/api/v1/camera/photos?limit=6`);
+        if (resPhotos.ok) {
+          const photoList = await resPhotos.json();
+          if (photoList.length > 0) {
+            setIa((prev) => ({
+              ...prev,
+              photos: photoList.map((p) => {
+                const cTime = p.captured_at ? new Date(p.captured_at).toLocaleTimeString() : new Date().toLocaleTimeString();
+                return {
+                  id: p.id,
+                  url: `${API_URL}${p.url}?t=${Date.now()}`,
+                  time: cTime,
+                  label: `Intrusion #${p.id} (${cTime})`,
+                };
+              }),
+            }));
+          } else {
+            const resPhoto = await fetch(`${API_URL}/api/v1/camera/latest_photo`);
+            if (resPhoto.ok) {
+              const tsHeader = resPhoto.headers.get('X-Capture-Timestamp');
+              const captureTime = tsHeader ? new Date(tsHeader).toLocaleTimeString() : new Date().toLocaleTimeString();
+              setIa((prev) => ({
+                ...prev,
+                photos: [
+                  {
+                    url: `${API_URL}/api/v1/camera/latest_photo?t=${Date.now()}`,
+                    time: captureTime,
+                    label: `Intrusion (${captureTime})`,
+                  },
+                ],
+              }));
+            }
+          }
         }
       } catch {
         // Aucune photo capturée pour le moment
