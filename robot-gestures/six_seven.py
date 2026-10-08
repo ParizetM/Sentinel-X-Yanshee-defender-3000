@@ -69,14 +69,14 @@ def do_six_seven(cycles=REPETITIONS, speed_ms=STEP_TIME):
     YanAPI.set_servos_angles(ready_pose, runtime=700)
     time.sleep(0.8)
 
-    # Démarrage de la voix TTS en anglais au lancement de l'oscillation
+    # Première prononciation au lancement du geste
     speak_tts_async(TTS_PHRASE)
 
     for i in range(1, cycles + 1):
         if not running:
             break
 
-        # Relance de la voix à mi-parcours pour accompagner la cadence
+        # Deuxième prononciation à mi-parcours
         if i == (cycles // 2) + 1:
             speak_tts_async(TTS_PHRASE)
 
