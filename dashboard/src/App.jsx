@@ -20,7 +20,7 @@ function App() {
   });
 
   const [history, setHistory] = useState([]);
-  const [ia] = useState({
+  const [ia, setIa] = useState({
     personCount: 0,
     detectionsLastHour: 0,
     robotActions: [],
@@ -65,6 +65,27 @@ function App() {
           message: a.message,
         })));
       }
+
+      // ⭐ Chargement de la dernière photo capturée
+      try {
+        const resPhoto = await fetch(`${API_URL}/api/v1/camera/latest_photo`);
+        if (resPhoto.ok) {
+          const tsHeader = resPhoto.headers.get('X-Capture-Timestamp');
+          const captureTime = tsHeader ? new Date(tsHeader).toLocaleTimeString() : new Date().toLocaleTimeString();
+          setIa((prev) => ({
+            ...prev,
+            photos: [
+              {
+                url: `${API_URL}/api/v1/camera/latest_photo?t=${Date.now()}`,
+                time: captureTime,
+                label: `Intrusion (${captureTime})`,
+              },
+            ],
+          }));
+        }
+      } catch {
+        // Aucune photo capturée pour le moment
+      }
     } catch (err) {
       console.error('Erreur chargement initial', err);
     }
@@ -86,6 +107,12 @@ function App() {
             diagnosis_label: firstDevice.anomaly.diagnosis_label ?? null,
           }));
         }
+        if (devices['yanshee-01']?.person_count !== undefined) {
+          setIa((prev) => ({
+            ...prev,
+            personCount: devices['yanshee-01'].person_count,
+          }));
+        }
       }
     } catch {
       // Silencieux
@@ -94,6 +121,50 @@ function App() {
 
   const handleMessage = useCallback((msg) => {
     if (msg.type === 'connection') return;
+
+    // ⭐ Réception temps réel d'une photo capturée par l'IA YOLO
+    if (msg.type === 'photo') {
+      const p = msg.data || {};
+      const captureTime = p.timestamp ? new Date(p.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+      const photoUrl = `${API_URL}${p.url || '/api/v1/camera/latest_photo'}?t=${Date.now()}`;
+      setIa((prev) => ({
+        ...prev,
+        photos: [
+          {
+            url: photoUrl,
+            time: captureTime,
+            label: `Intrusion (${captureTime})`,
+          },
+          ...prev.photos.slice(0, 5),
+        ],
+      }));
+      return;
+    }
+
+    // ⭐ Mise à jour du compteur de personnes en direct
+    if (msg.type === 'person_count' && msg.data) {
+      setIa((prev) => ({
+        ...prev,
+        personCount: msg.data.person_count ?? 0,
+      }));
+      return;
+    }
+
+    // ⭐ Actions physiques exécutées par le robot
+    if (msg.type === 'robot_action' && msg.data) {
+      const actionName = typeof msg.data === 'string' ? msg.data : JSON.stringify(msg.data);
+      setIa((prev) => ({
+        ...prev,
+        robotActions: [
+          {
+            time: new Date().toLocaleTimeString(),
+            action: actionName,
+          },
+          ...prev.robotActions.slice(0, 9),
+        ],
+      }));
+      return;
+    }
 
     if (msg.type === 'anomaly' && msg.data) {
       const a = msg.data;
@@ -126,6 +197,28 @@ function App() {
       ]);
       if (a.value !== undefined && a.alert_type?.includes('gas')) {
         setData((prev) => ({ ...prev, gas: a.value }));
+      }
+      // Si alerte intrusion : rafraîchir la photo
+      if (a.alert_type === 'human_intrusion' || a.source === 'ia_vision') {
+        const captureTime = new Date(a.created_at || Date.now()).toLocaleTimeString();
+        setTimeout(async () => {
+          try {
+            const resPhoto = await fetch(`${API_URL}/api/v1/camera/latest_photo`);
+            if (resPhoto.ok) {
+              setIa((prev) => ({
+                ...prev,
+                photos: [
+                  {
+                    url: `${API_URL}/api/v1/camera/latest_photo?t=${Date.now()}`,
+                    time: captureTime,
+                    label: `Intrusion (${captureTime})`,
+                  },
+                  ...prev.photos.slice(0, 5),
+                ],
+              }));
+            }
+          } catch {}
+        }, 300);
       }
       return;
     }

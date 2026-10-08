@@ -112,7 +112,16 @@ class SentinelMQTTClient:
             # 1. Photo binaire reçue de l'IA (detection_robot/photo)
             if topic == "detection_robot/photo":
                 latest_photo_cache = payload_bytes
+                if not latest_photo_timestamp:
+                    latest_photo_timestamp = datetime.now(timezone.utc).isoformat()
                 logger.info(f"[MQTT] Photo JPEG reçue ({len(payload_bytes)} octets)")
+                await ws_manager.broadcast({
+                    "type": "photo",
+                    "data": {
+                        "timestamp": latest_photo_timestamp,
+                        "url": "/api/v1/camera/latest_photo"
+                    }
+                })
                 return
 
             # Décoder en texte pour les autres topics
@@ -152,6 +161,13 @@ class SentinelMQTTClient:
                     "person_count": count,
                     "last_seen": datetime.now(timezone.utc).isoformat()
                 }
+
+                await ws_manager.broadcast({
+                    "type": "person_count",
+                    "data": {
+                        "person_count": count
+                    }
+                })
 
                 # Si personnes détectées > 0 : génération alerte intrusion
                 if count > 0:
